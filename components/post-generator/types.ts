@@ -1,8 +1,8 @@
-import { Session } from "next-auth";
+import { Models } from "appwrite";
 
 export interface UserSession {
-  session: Session | null;
-  status: "loading" | "authenticated" | "unauthenticated";
+  user: Models.User<Models.Preferences> | null;
+  loading: boolean;
 }
 
 export interface AIGenerationState {
@@ -19,8 +19,8 @@ export interface EditorState {
 }
 
 export interface HeaderProps {
-  session: Session | null;
-  status: "loading" | "authenticated" | "unauthenticated";
+  user: Models.User<Models.Preferences> | null;
+  loading: boolean;
   isPosting: boolean;
   hasContent: boolean;
   onPublish: () => void;

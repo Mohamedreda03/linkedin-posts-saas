@@ -2,14 +2,13 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
   Globe,
   MoreHorizontal,
   ThumbsUp,
   MessageSquare,
-  Repeat2,
+  Repeat,
   Send,
 } from "lucide-react";
 import { useState } from "react";
@@ -53,10 +52,10 @@ export function LinkedInPreview({
   };
 
   return (
-    <Card className="w-full bg-white border border-[#d3d3d3] shadow-sm overflow-hidden rounded-lg font-[system-ui,-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,sans-serif]">
+    <div className="w-full bg-white border border-gray-300 rounded-lg overflow-hidden font-sans shadow-sm">
       {/* Header */}
-      <div className="p-4 pb-0 flex gap-2">
-        <Avatar className="w-12 h-12 rounded-full shrink-0">
+      <div className="p-3 flex gap-3">
+        <Avatar className="w-12 h-12 cursor-pointer">
           {authorImage ? (
             <AvatarImage
               src={authorImage}
@@ -71,14 +70,14 @@ export function LinkedInPreview({
 
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start">
-            <div className="flex flex-col leading-tight">
-              <h3 className="font-semibold text-[14px] text-[#000000e6] hover:text-[#0a66c2] hover:underline cursor-pointer">
+            <div className="flex flex-col">
+              <h3 className="font-semibold text-[14px] text-gray-900 hover:text-[#0a66c2] hover:underline cursor-pointer truncate">
                 {authorName}
               </h3>
-              <p className="text-[12px] text-[#00000099] line-clamp-1 mt-0.5">
+              <p className="text-[12px] text-gray-500 truncate leading-tight">
                 {authorHeadline}
               </p>
-              <div className="flex items-center gap-1 text-[12px] text-[#00000099] mt-0.5">
+              <div className="flex items-center gap-1 text-[12px] text-gray-500 mt-0.5">
                 <span>Just now</span>
                 <span>•</span>
                 <Globe className="w-3 h-3" />
@@ -87,7 +86,7 @@ export function LinkedInPreview({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-[#00000099] hover:bg-[#00000014] rounded-full -mr-2"
+              className="h-8 w-8 text-gray-500 hover:bg-gray-100 rounded-full -mr-2"
             >
               <MoreHorizontal className="w-5 h-5" />
             </Button>
@@ -98,7 +97,7 @@ export function LinkedInPreview({
       {/* Content */}
       <div
         dir={textDirection}
-        className={`px-4 py-3 text-[14px] text-[#000000e6] whitespace-pre-line leading-[1.42857] wrap-break-word ${
+        className={`px-4 pb-2 text-[14px] text-gray-900 whitespace-pre-wrap leading-relaxed break-words ${
           textDirection === "rtl" ? "text-right" : "text-left"
         }`}
       >
@@ -106,7 +105,7 @@ export function LinkedInPreview({
         {shouldTruncate && !isExpanded && (
           <button
             onClick={() => setIsExpanded(true)}
-            className="text-[#00000099] hover:text-[#0a66c2] hover:underline font-semibold"
+            className="text-gray-500 hover:text-[#0a66c2] hover:underline font-semibold ml-1"
           >
             ...see more
           </button>
@@ -114,14 +113,12 @@ export function LinkedInPreview({
       </div>
 
       {/* Engagement Stats */}
-      <div className="px-4 py-2 flex items-center justify-between text-[12px] text-[#00000099]">
-        <div className="flex items-center gap-0.5 hover:text-[#0a66c2] hover:underline cursor-pointer">
-          <div className="flex -space-x-0.5">
-            <div className="w-4 h-4 rounded-full bg-[#378fe9] flex items-center justify-center z-10">
-              <ThumbsUp className="w-2.5 h-2.5 text-white fill-white" />
-            </div>
+      <div className="px-4 py-2 flex items-center justify-between text-[12px] text-gray-500 border-b border-gray-100">
+        <div className="flex items-center gap-1 cursor-pointer hover:text-[#0a66c2] hover:underline">
+          <div className="w-4 h-4 rounded-full bg-[#0a66c2] flex items-center justify-center">
+            <ThumbsUp className="w-2.5 h-2.5 text-white fill-current" />
           </div>
-          <span className="ml-1">24</span>
+          <span className="ml-1 hover:text-[#0a66c2] hover:underline">24</span>
         </div>
         <div className="flex gap-1">
           <span className="hover:text-[#0a66c2] hover:underline cursor-pointer">
@@ -134,21 +131,17 @@ export function LinkedInPreview({
         </div>
       </div>
 
-      <div className="px-4">
-        <Separator className="bg-[#00000026]" />
-      </div>
-
       {/* Action Buttons */}
-      <div className="px-2 py-1 flex justify-around">
+      <div className="px-1 py-1 flex justify-between items-center">
         <ActionButton icon={<ThumbsUp className="w-5 h-5" />} label="Like" />
         <ActionButton
           icon={<MessageSquare className="w-5 h-5" />}
           label="Comment"
         />
-        <ActionButton icon={<Repeat2 className="w-5 h-5" />} label="Repost" />
+        <ActionButton icon={<Repeat className="w-5 h-5" />} label="Repost" />
         <ActionButton icon={<Send className="w-5 h-5" />} label="Send" />
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -162,10 +155,10 @@ function ActionButton({
   return (
     <Button
       variant="ghost"
-      className="flex-1 flex items-center justify-center gap-1.5 text-[#00000099] hover:bg-[#00000014] hover:text-[#000000e6] font-semibold text-[14px] h-11 rounded-md transition-colors px-2"
+      className="flex-1 flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 font-semibold text-[14px] h-12 rounded-md transition-colors"
     >
       {icon}
-      <span className="hidden sm:inline">{label}</span>
+      <span className="text-gray-500 font-semibold">{label}</span>
     </Button>
   );
 }

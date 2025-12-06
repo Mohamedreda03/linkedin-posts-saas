@@ -43,107 +43,133 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Custom Colors */
+  /* Custom Colors - Mapped to new theme */
   --color-brand-blue: var(--brand-blue);
   --color-brand-orange: var(--brand-orange);
   --color-brand-yellow: var(--brand-yellow);
 }
 
 :root {
-  /* Clean LinkedIn-inspired Theme (colors only) */
-  --background: 210 20% 98%; /* very light gray */
-  --foreground: 215 12% 12%; /* dark slate for text */
+  /* Modern AI SaaS Theme - Bright, Clean, & Magical */
 
-  --card: 0 0% 100%;
-  --card-foreground: 215 12% 12%;
+  /* Base: Clean White with a hint of cool tint */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(240 10% 3.9%);
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 215 12% 12%;
+  /* Cards: Pure white to stand out against any subtle backgrounds */
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 3.9%);
 
-  /* LinkedIn Blue (primary) */
-  /* #0A66C2 ≈ hsl(212, 92%, 39%) */
-  --primary: 212 92% 39%;
-  --primary-foreground: 0 0% 100%;
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 3.9%);
 
-  /* Neutral gray for secondary surfaces */
-  --secondary: 210 15% 94%;
-  --secondary-foreground: 215 12% 40%;
+  /* Primary: Vibrant Violet/Indigo - Represents Intelligence & Magic */
+  /* #6366f1 (Indigo-500) to #8b5cf6 (Violet-500) feel */
+  --primary: hsl(256 100% 67%); /* A bright, electric violet */
+  --primary-foreground: hsl(0 0% 100%);
 
-  /* Deep Orange Accent for CTA / highlights */
-  /* #C76A00 ≈ hsl(28, 100%, 38%) */
-  --accent: 28 100% 38%;
-  --accent-foreground: 0 0% 100%;
+  /* Secondary: Soft Cool Gray/Lavender tint */
+  --secondary: hsl(255 30% 96%);
+  --secondary-foreground: hsl(255 40% 40%);
 
-  --muted: 210 18% 96%;
-  --muted-foreground: 215 10% 50%;
+  /* Muted: Subtle grays for de-emphasized text */
+  --muted: hsl(240 4.8% 95.9%);
+  --muted-foreground: hsl(240 3.8% 46.1%);
 
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 100%;
+  /* Accent: Used for hover states, subtle highlights */
+  --accent: hsl(255 30% 96%);
+  --accent-foreground: hsl(255 40% 40%);
 
-  --border: 210 14% 90%;
-  --input: 210 14% 90%;
-  --ring: 212 92% 39%;
+  /* Destructive: Soft Red */
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
 
-  --radius: 0.625rem;
+  /* Borders: Very subtle to keep it clean */
+  --border: hsl(240 5.9% 90%);
+  --input: hsl(240 5.9% 90%);
 
-  /* Brand Specifics mapped to the new palette */
-  --brand-blue: 212 92% 39%;
-  --brand-orange: 28 100% 38%;
-  --brand-yellow: 42 95% 50%;
+  /* Ring: Matches primary for focus states */
+  --ring: hsl(256 100% 67%);
 
-  --sidebar: 0 0% 98%;
-  --sidebar-foreground: 215 12% 12%;
-  --sidebar-primary: 212 92% 39%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 210 18% 96%;
-  --sidebar-accent-foreground: 215 12% 12%;
-  --sidebar-border: 210 12% 92%;
-  --sidebar-ring: 212 92% 39%;
+  /* Radius: Slightly more rounded for a friendly, modern feel */
+  --radius: 0.75rem;
+
+  /* Charts */
+  --chart-1: hsl(256 100% 67%);
+  --chart-2: hsl(280 85% 60%);
+  --chart-3: hsl(190 90% 50%);
+  --chart-4: hsl(45 90% 60%);
+  --chart-5: hsl(10 80% 60%);
+
+  /* Sidebar */
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+  /* Legacy Brand Colors Mapped to New Theme */
+  --brand-blue: hsl(256 100% 67%); /* Maps to Primary */
+  --brand-orange: hsl(280 85% 60%); /* Maps to Chart-2 (Purple/Pink) */
+  --brand-yellow: hsl(45 90% 60%); /* Maps to Chart-4 (Gold) */
 }
 
 .dark {
-  --background: 215 20% 7%; /* dark slate */
-  --foreground: 210 10% 96%;
+  /* Dark Mode: Deep Zinc/Slate - Professional & Easy on eyes */
+  --background: hsl(240 10% 3.9%);
+  --foreground: hsl(0 0% 98%);
 
-  --card: 215 20% 10%;
-  --card-foreground: 210 10% 96%;
+  --card: hsl(240 10% 3.9%);
+  --card-foreground: hsl(0 0% 98%);
 
-  --popover: 215 20% 10%;
-  --popover-foreground: 210 10% 96%;
+  --popover: hsl(240 10% 3.9%);
+  --popover-foreground: hsl(0 0% 98%);
 
-  --primary: 212 92% 45%;
-  --primary-foreground: 0 0% 100%;
+  /* Primary: Slightly lighter violet for dark mode contrast */
+  --primary: hsl(263 70% 50%);
+  --primary-foreground: hsl(0 0% 98%);
 
-  --secondary: 215 20% 14%;
-  --secondary-foreground: 210 12% 96%;
+  --secondary: hsl(240 3.7% 15.9%);
+  --secondary-foreground: hsl(0 0% 98%);
 
-  --accent: 28 100% 44%;
-  --accent-foreground: 0 0% 100%;
+  --muted: hsl(240 3.7% 15.9%);
+  --muted-foreground: hsl(240 5% 64.9%);
 
-  --muted: 215 20% 12%;
-  --muted-foreground: 215 18% 64%;
+  --accent: hsl(240 3.7% 15.9%);
+  --accent-foreground: hsl(0 0% 98%);
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(0 0% 98%);
 
-  --border: 215 20% 16%;
-  --input: 215 20% 16%;
-  --ring: 212 92% 45%;
+  --border: hsl(240 3.7% 15.9%);
+  --input: hsl(240 3.7% 15.9%);
+  --ring: hsl(263 70% 50%);
 
-  --brand-blue: 212 92% 45%;
-  --brand-orange: 28 100% 44%;
-  --brand-yellow: 42 95% 52%;
+  /* Charts */
+  --chart-1: hsl(263 70% 50%);
+  --chart-2: hsl(280 60% 50%);
+  --chart-3: hsl(190 70% 40%);
+  --chart-4: hsl(45 70% 50%);
+  --chart-5: hsl(10 60% 50%);
 
-  --sidebar: 215 20% 10%;
-  --sidebar-foreground: 210 10% 96%;
-  --sidebar-primary: 212 92% 45%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 215 20% 12%;
-  --sidebar-accent-foreground: 210 10% 96%;
-  --sidebar-border: 215 20% 16%;
-  --sidebar-ring: 212 92% 45%;
+  /* Sidebar */
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+  /* Legacy Brand Colors Mapped to New Theme */
+  --brand-blue: hsl(263 70% 50%);
+  --brand-orange: hsl(280 60% 50%);
+  --brand-yellow: hsl(45 70% 50%);
 }
-
 @layer base {
   * {
     @apply border-border outline-ring/50;

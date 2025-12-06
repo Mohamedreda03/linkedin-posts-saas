@@ -2,14 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Copy,
   MoreHorizontal,
   Globe,
   ThumbsUp,
-  MessageCircle,
-  Repeat2,
+  MessageSquare,
+  Repeat,
   Send,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -33,122 +32,136 @@ export function PreviewPane({
   };
 
   return (
-    <div className="w-[400px] border-l border-primary/10 bg-[#f3f2ef] overflow-hidden flex flex-col">
-      {/* Preview Header */}
-      <div className="p-4 bg-white border-b border-primary/10 flex items-center justify-between">
+    <div className="w-[400px] border-l border-border bg-[#f3f2ef] dark:bg-black flex flex-col h-full">
+      {/* Tool Header */}
+      <div className="p-4 bg-background border-b flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#C76A00]" />
-          <span className="font-semibold text-sm text-[#2e2e2e]">
-            LinkedIn Preview
-          </span>
+          <div className="w-3 h-3 rounded-full bg-blue-600" />
+          <span className="font-semibold text-sm">Live Preview</span>
         </div>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={handleCopy}
-          className="text-[#2e2e2e] hover:bg-[#2e2e2e]/10 rounded-none h-8"
+          className="h-8 gap-2"
         >
-          <Copy className="w-4 h-4 mr-1.5" />
-          Copy
+          <Copy className="w-3.5 h-3.5" />
+          Copy Text
         </Button>
       </div>
 
-      {/* LinkedIn Post Preview */}
+      {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto p-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {/* LinkedIn Post Card */}
+        <div className="bg-white dark:bg-[#1b1f23] rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden shadow-sm">
           {/* Post Header */}
-          <div className="p-4">
-            <div className="flex items-start gap-3">
-              <Avatar className="w-12 h-12 border-2 border-white shadow-md">
-                <AvatarImage src={authorImage || ""} />
-                <AvatarFallback className="bg-linear-to-br from-[#2e2e2e] to-[#3b3b3b] text-white font-bold">
-                  {authorName?.charAt(0) || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-sm text-gray-900">
-                      {authorName || "Your Name"}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Professional Title • 1st
-                    </p>
-                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
-                      <span>Just now</span>
-                      <span>•</span>
-                      <Globe className="w-3 h-3" />
-                    </div>
+          <div className="p-3 flex gap-3">
+            <Avatar className="w-12 h-12 cursor-pointer">
+              <AvatarImage src={authorImage || ""} />
+              <AvatarFallback className="bg-blue-600 text-white font-semibold">
+                {authorName?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between">
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm text-gray-900 dark:text-white hover:text-blue-600 hover:underline cursor-pointer truncate">
+                    {authorName || "Your Name"}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    Content Creator | LinkedIn Enthusiast
+                  </span>
+                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    <span>Just now</span>
+                    <span>•</span>
+                    <Globe className="w-3 h-3" />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="w-8 h-8 text-gray-400"
-                  >
-                    <MoreHorizontal className="w-5 h-5" />
-                  </Button>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                >
+                  <MoreHorizontal className="w-5 h-5" />
+                </Button>
               </div>
-            </div>
-
-            {/* Post Content */}
-            <div className="mt-4">
-              {content ? (
-                <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
-                  {content}
-                </div>
-              ) : (
-                <div className="text-sm text-gray-400 italic">
-                  Your post preview will appear here...
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Engagement Stats */}
-          <div className="px-4 py-2 border-t border-gray-100">
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <div className="flex items-center gap-1">
-                <div className="flex -space-x-1">
-                  <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
-                    <ThumbsUp className="w-2.5 h-2.5 text-white" />
-                  </div>
-                  <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
-                    <span className="text-[8px]">❤️</span>
-                  </div>
-                </div>
-                <span>0</span>
+          {/* Post Content */}
+          <div className="px-4 pb-2">
+            {content ? (
+              <div
+                className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap leading-relaxed break-words"
+                dir="auto"
+              >
+                {content}
               </div>
-              <span>0 comments • 0 reposts</span>
+            ) : (
+              <div className="text-sm text-gray-400 italic py-8 text-center">
+                Start writing to see your preview here...
+              </div>
+            )}
+          </div>
+
+          {/* Engagement Stats */}
+          <div className="px-4 py-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-1 cursor-pointer hover:text-blue-600 hover:underline">
+              <div className="flex -space-x-1">
+                <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center z-20 ring-2 ring-white dark:ring-[#1b1f23]">
+                  <ThumbsUp className="w-2.5 h-2.5 text-white fill-current" />
+                </div>
+                <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center z-10 ring-2 ring-white dark:ring-[#1b1f23]">
+                  <span className="text-[8px] text-white">❤️</span>
+                </div>
+                <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center ring-2 ring-white dark:ring-[#1b1f23]">
+                  <span className="text-[8px] text-white">👏</span>
+                </div>
+              </div>
+              <span className="ml-1">124</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="hover:text-blue-600 hover:underline cursor-pointer">
+                42 comments
+              </span>
+              <span>•</span>
+              <span className="hover:text-blue-600 hover:underline cursor-pointer">
+                12 reposts
+              </span>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="px-2 py-1 border-t border-gray-100">
-            <div className="flex items-center justify-between">
-              {[
-                { icon: ThumbsUp, label: "Like" },
-                { icon: MessageCircle, label: "Comment" },
-                { icon: Repeat2, label: "Repost" },
-                { icon: Send, label: "Send" },
-              ].map((action) => (
-                <button
-                  key={action.label}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 text-gray-600 hover:bg-gray-100 transition-colors text-sm font-medium"
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="hidden sm:inline">{action.label}</span>
-                </button>
-              ))}
-            </div>
+          <div className="px-2 py-1 flex items-center justify-between">
+            <Button
+              variant="ghost"
+              className="flex-1 gap-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md h-12"
+            >
+              <ThumbsUp className="w-5 h-5" />
+              <span className="font-semibold text-sm">Like</span>
+            </Button>
+            <Button
+              variant="ghost"
+              className="flex-1 gap-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md h-12"
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span className="font-semibold text-sm">Comment</span>
+            </Button>
+            <Button
+              variant="ghost"
+              className="flex-1 gap-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md h-12"
+            >
+              <Repeat className="w-5 h-5" />
+              <span className="font-semibold text-sm">Repost</span>
+            </Button>
+            <Button
+              variant="ghost"
+              className="flex-1 gap-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md h-12"
+            >
+              <Send className="w-5 h-5" />
+              <span className="font-semibold text-sm">Send</span>
+            </Button>
           </div>
-        </div>
-
-        {/* Pro Badge */}
-        <div className="mt-4 text-center">
-          <Badge className="bg-linear-to-r from-[#C76A00] to-[#E67E00] text-white text-[10px] font-bold border-0">
-            PostCraft Pro Preview
-          </Badge>
         </div>
       </div>
     </div>

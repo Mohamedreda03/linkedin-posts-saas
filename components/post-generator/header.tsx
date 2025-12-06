@@ -1,20 +1,22 @@
 "use client";
 
-import { signIn, signOut } from "next-auth/react";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
-import { PenLine, LogOut, Linkedin, Send } from "lucide-react";
+import { PenLine, LogOut, Send } from "lucide-react";
 import { HeaderProps } from "./types";
 
 export function Header({
-  session,
-  status,
+  user,
+  loading,
   isPosting,
   hasContent,
   onPublish,
 }: HeaderProps) {
+  const { logout } = useAuth();
+
   return (
     <header className="h-16 border-b border-primary/10 bg-white/90 backdrop-blur-xl flex items-center justify-between px-6 z-20 sticky top-0 shadow-sm">
       <div className="flex items-center gap-3">
@@ -33,40 +35,32 @@ export function Header({
       </div>
 
       <div className="flex items-center gap-4">
-        {status === "loading" ? (
+        {loading ? (
           <div className="w-9 h-9 rounded-full bg-primary/10 animate-pulse" />
-        ) : session ? (
+        ) : user ? (
           <div className="flex items-center gap-3 pl-4 border-l border-primary/10">
             <div className="text-right hidden md:block">
               <p className="text-sm font-semibold text-foreground">
-                {session.user?.name}
+                {user.name}
               </p>
               <p className="text-xs text-[#C76A00] font-medium">Pro Member</p>
             </div>
             <Avatar className="w-10 h-10 border-2 border-[#2e2e2e]/20 shadow-md ring-2 ring-[#2e2e2e]/10 ring-offset-2 cursor-pointer hover:ring-[#2e2e2e]/30 transition-all">
-              <AvatarImage src={session.user?.image || ""} />
+              <AvatarImage src="" />
               <AvatarFallback className="bg-linear-to-br from-[#2e2e2e] to-[#3b3b3b] text-white font-bold">
-                {session.user?.name?.charAt(0)}
+                {user.name?.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => signOut()}
+              onClick={() => logout()}
               className="text-muted-foreground hover:text-red-500 hover:bg-red-50"
             >
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
-        ) : (
-          <Button
-            onClick={() => signIn("linkedin")}
-            className="bg-[#2a2a2a] hover:bg-[#3a3a3a] text-white shadow-lg shadow-[#2a2a2a]/30 rounded-full px-6 font-medium transition-all hover:scale-105"
-          >
-            <Linkedin className="w-4 h-4 mr-2" />
-            Connect LinkedIn
-          </Button>
-        )}
+        ) : null}
 
         {/* Publish Button */}
         <Button

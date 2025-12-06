@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/command";
 
 export function PostGenerator() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const [content, setContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
@@ -160,8 +160,8 @@ export function PostGenerator() {
     <div className="h-screen flex flex-col overflow-hidden bg-linear-to-br from-[#f8fafc] via-[#fafafa] to-[#f4f4f5]">
       {/* Header Component */}
       <Header
-        session={session}
-        status={status}
+        user={user}
+        loading={loading}
         isPosting={isPosting}
         hasContent={content.trim().length > 0}
         onPublish={handlePublish}
@@ -560,8 +560,8 @@ export function PostGenerator() {
                   content ||
                   "Your post content will appear here as you type...\n\nStart writing to see the magic happen! "
                 }
-                authorName={session?.user?.name || "Your Name"}
-                authorImage={session?.user?.image || undefined}
+                authorName={user?.name || "Your Name"}
+                authorImage={undefined}
                 authorHeadline="Creator & Thought Leader"
               />
 
