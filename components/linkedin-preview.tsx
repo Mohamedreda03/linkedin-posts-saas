@@ -3,6 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { getTextDirection } from "@/lib/utils";
 import {
   Globe,
   MoreHorizontal,
@@ -28,13 +29,7 @@ export function LinkedInPreview({
 }: LinkedInPreviewProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Detect if text is Arabic (RTL)
-  const isRTL = (text: string) => {
-    const arabicPattern = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/;
-    return arabicPattern.test(text.trim().charAt(0));
-  };
-
-  const textDirection = isRTL(content) ? "rtl" : "ltr";
+  const textDirection = getTextDirection(content);
 
   // Simple logic to truncate text for "See more"
   const shouldTruncate = content.length > 250;

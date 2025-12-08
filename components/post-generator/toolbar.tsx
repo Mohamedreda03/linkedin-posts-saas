@@ -1,84 +1,117 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sparkles, X, RefreshCw, Flame, SpellCheck } from "lucide-react";
+import {
+  Sparkles,
+  RefreshCw,
+  Zap,
+  Wand2,
+  ChevronDown,
+  History,
+  Settings,
+} from "lucide-react";
 import { ToolbarProps } from "./types";
 
 export function Toolbar({
   isDialogOpen,
+  setIsDialogOpen,
+  isRewriting,
+  content,
+  onRewrite,
   charCount,
   wordCount,
-  onToggleAI,
-  onRewrite,
 }: ToolbarProps) {
   return (
-    <div className="flex items-center justify-between p-4 border-b border-primary/10 bg-white/80 backdrop-blur-sm">
-      <div className="flex items-center gap-2">
-        {/* AI Toggle Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onToggleAI}
-          className={`rounded-none font-medium transition-all h-9 px-4 ${
-            isDialogOpen
-              ? "bg-[#1e1e1e] text-white border-[#1e1e1e] hover:bg-[#2a2a2a] hover:text-white hover:border-[#2a2a2a]"
-              : "bg-[#2e2e2e] text-white border-[#2e2e2e] hover:bg-[#3b3b3b] hover:text-white hover:border-[#3b3b3b]"
+    <div className="h-14 border-b border-primary/10 flex items-center px-6 gap-2 bg-white/80 backdrop-blur-sm z-10 shadow-sm">
+      <Button
+        onClick={() => setIsDialogOpen(!isDialogOpen)}
+        className={`inline-flex items-center px-5 py-2 h-10 gap-2 font-bold rounded-none transition-colors duration-200 select-none border border-[#2b2b2b] ${
+          isDialogOpen
+            ? "bg-[#e5e5e5] text-[#101010] hover:bg-[#d4d4d4]"
+            : "bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] shadow-md"
+        }`}
+        aria-expanded={isDialogOpen}
+      >
+        <Sparkles className="w-4 h-4" />
+        <span className="whitespace-nowrap text-xs uppercase tracking-wider">
+          {isDialogOpen ? "Close AI" : "AI"}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 transition-transform duration-300 ml-1 ${
+            isDialogOpen ? "rotate-180" : ""
           }`}
-        >
-          {isDialogOpen ? (
-            <>
-              <X className="w-4 h-4 mr-1.5" />
-              Close AI
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 mr-1.5" />
-              AI
-            </>
-          )}
-        </Button>
+        />
+      </Button>
 
-        {/* Rewrite Button */}
+      <div className="w-px h-8 bg-primary/10 mx-3" />
+
+      <div className="flex items-center gap-1">
         <Button
-          variant="outline"
-          size="sm"
+          variant="ghost"
           onClick={onRewrite}
-          className="border-[#2e2e2e]/30 text-[#2e2e2e] hover:bg-[#2e2e2e] hover:text-white hover:border-[#2e2e2e] rounded-none font-medium h-9 px-4 transition-all"
+          disabled={isRewriting || !content.trim()}
+          className={`gap-2 font-medium transition-all duration-200 ${
+            isRewriting
+              ? "text-[#2e2e2e] bg-[#2e2e2e]/10"
+              : "text-muted-foreground hover:text-[#2e2e2e] hover:bg-[#2e2e2e]/10"
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          <RefreshCw className="w-4 h-4 mr-1.5" />
-          Rewrite
+          <RefreshCw
+            className={`w-4 h-4 transition-transform ${
+              isRewriting ? "animate-spin" : ""
+            }`}
+          />
+          {isRewriting ? "Rewriting..." : "Rewrite"}
         </Button>
-
-        {/* Viral Hook Button */}
         <Button
-          variant="outline"
-          size="sm"
-          className="border-[#C76A00]/30 text-[#C76A00] hover:bg-[#C76A00] hover:text-white hover:border-[#C76A00] rounded-none font-medium h-9 px-4 transition-all"
+          variant="ghost"
+          className="text-muted-foreground hover:text-[#C76A00] hover:bg-[#C76A00]/10 gap-2 font-medium"
         >
-          <Flame className="w-4 h-4 mr-1.5" />
+          <Zap className="w-4 h-4" />
           Viral Hook
         </Button>
-
-        {/* Fix Grammar Button */}
         <Button
-          variant="outline"
-          size="sm"
-          className="border-[#2e2e2e]/30 text-[#2e2e2e] hover:bg-[#2e2e2e] hover:text-white hover:border-[#2e2e2e] rounded-none font-medium h-9 px-4 transition-all"
+          variant="ghost"
+          className="text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 gap-2 font-medium"
         >
-          <SpellCheck className="w-4 h-4 mr-1.5" />
+          <Wand2 className="w-4 h-4" />
           Fix Grammar
         </Button>
       </div>
 
-      {/* Character/Word Count */}
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span
-          className={`font-medium ${charCount > 2800 ? "text-red-500" : ""}`}
+      <div className="ml-auto flex items-center gap-3">
+        {/* Character Counter */}
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/5 rounded-full">
+          <span
+            className={`text-xs font-semibold ${
+              charCount > 3000
+                ? "text-red-500"
+                : charCount > 2500
+                ? "text-[#C76A00]"
+                : "text-muted-foreground"
+            }`}
+          >
+            {charCount.toLocaleString()} chars
+          </span>
+          <span className="text-muted-foreground/40"></span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {wordCount} words
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-foreground hover:bg-primary/10"
         >
-          {charCount}/3000
-        </span>
-        <span className="text-primary/30">•</span>
-        <span>{wordCount} words</span>
+          <History className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-foreground hover:bg-primary/10"
+        >
+          <Settings className="w-4 h-4" />
+        </Button>
       </div>
     </div>
   );

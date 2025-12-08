@@ -1,23 +1,36 @@
 "use client";
 
-import { PostGenerator } from "@/components/post-generator";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
-export default function GeneratorPage() {
-  const { loading, user } = useAuth();
+export default function GeneratorRedirectPage() {
+  const router = useRouter();
+  const { currentWorkspace, workspaces, workspacesLoading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (workspacesLoading) return;
 
-  if (!user) {
-    return null; // Will redirect via AuthContext
-  }
+    // If user has a current workspace, redirect to compose
+    if (currentWorkspace) {
+      router.replace(`/ws/${currentWorkspace.$id}/compose`);
+      return;
+    }
 
-  return <PostGenerator />;
+    // If user has workspaces but no current, use first one
+    if (workspaces && workspaces.length > 0) {
+      router.replace(`/ws/${workspaces[0].$id}/compose`);
+      return;
+    }
+
+    // No workspaces, redirect to onboarding
+    router.replace("/onboarding");
+  }, [currentWorkspace, workspaces, workspacesLoading, router]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Spinner size="lg" />
+    </div>
+  );
 }

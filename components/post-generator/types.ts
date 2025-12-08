@@ -1,21 +1,21 @@
+import { SocialAccount } from "@/lib/appwrite";
 import { Models } from "appwrite";
 
-export interface UserSession {
-  user: Models.User<Models.Preferences> | null;
-  loading: boolean;
-}
-
-export interface AIGenerationState {
+// Common types used across post-generator components
+export interface PostGeneratorState {
+  content: string;
+  isGenerating: boolean;
+  isPosting: boolean;
+  showPreview: boolean;
+  linkedInAccount: SocialAccount | null;
+  isLoadingAccount: boolean;
   isDialogOpen: boolean;
   topic: string;
   tone: string;
-  isGenerating: boolean;
-}
-
-export interface EditorState {
-  content: string;
-  charCount: number;
-  wordCount: number;
+  dialect: string;
+  dialectOpen: boolean;
+  postLength: "short" | "medium" | "long";
+  isRewriting: boolean;
 }
 
 export interface HeaderProps {
@@ -28,38 +28,67 @@ export interface HeaderProps {
 
 export interface ToolbarProps {
   isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+  isRewriting: boolean;
+  content: string;
+  onRewrite: () => void;
   charCount: number;
   wordCount: number;
-  onToggleAI: () => void;
-  onRewrite: () => void;
 }
 
 export interface AIPanelProps {
   isOpen: boolean;
-  topic: string;
-  tone: string;
-  isGenerating: boolean;
-  onTopicChange: (topic: string) => void;
-  onToneChange: (tone: string) => void;
-  onGenerate: () => void;
   onClose: () => void;
+  topic: string;
+  setTopic: (topic: string) => void;
+  tone: string;
+  setTone: (tone: string) => void;
+  dialect: string;
+  setDialect: (dialect: string) => void;
+  dialectOpen: boolean;
+  setDialectOpen: (open: boolean) => void;
+  postLength: "short" | "medium" | "long";
+  setPostLength: (length: "short" | "medium" | "long") => void;
+  isGenerating: boolean;
+  onGenerate: () => void;
 }
 
-export interface EditorProps {
+export interface EditorAreaProps {
   content: string;
-  onChange: (content: string) => void;
+  setContent: (content: string) => void;
+  textDirection: "rtl" | "ltr";
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 export interface PreviewPaneProps {
-  isVisible: boolean;
+  showPreview: boolean;
   content: string;
-  authorName: string;
-  authorImage?: string;
-  onCopy: () => void;
+  user: Models.User<Models.Preferences> | null;
+}
+
+export interface AccountStatusBarProps {
+  linkedInAccount: SocialAccount | null;
+  isLoadingAccount: boolean;
+  workspaceId: string;
+  workspaceName: string;
 }
 
 export interface PreviewToggleProps {
   showPreview: boolean;
-  onToggle: () => void;
+  setShowPreview: (show: boolean) => void;
 }
+
+// Style options for AI generation
+export const TONE_OPTIONS = [
+  { value: "professional", label: "Professional", icon: "💼" },
+  { value: "casual", label: "Casual", icon: "😊" },
+  { value: "storytelling", label: "Storytelling", icon: "📖" },
+  { value: "educational", label: "Educational", icon: "🎓" },
+  { value: "inspiring", label: "Inspiring", icon: "✨" },
+];
+
+export const LENGTH_OPTIONS = [
+  { value: "short", label: "Short" },
+  { value: "medium", label: "Medium" },
+  { value: "long", label: "Long" },
+] as const;

@@ -24,7 +24,7 @@ export default function SignInPage() {
     try {
       await account.createEmailPasswordSession(email, password);
       toast.success("Signed in successfully!");
-      router.push("/generator");
+      router.push("/dashboard"); // Will redirect to workspace
     } catch (error: any) {
       toast.error(error.message || "Failed to sign in");
     } finally {
@@ -36,7 +36,7 @@ export default function SignInPage() {
     try {
       account.createOAuth2Session(
         OAuthProvider.Google,
-        `${window.location.origin}/generator`,
+        `${window.location.origin}/dashboard`,
         `${window.location.origin}/auth/sign-in`
       );
     } catch (error: any) {
