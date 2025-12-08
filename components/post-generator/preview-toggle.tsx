@@ -1,28 +1,24 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import { Maximize2, LayoutTemplate } from "lucide-react";
 import { PreviewToggleProps } from "./types";
 
-export function PreviewToggle({ showPreview, onToggle }: PreviewToggleProps) {
+export function PreviewToggle({ showPreview, setShowPreview }: PreviewToggleProps) {
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={onToggle}
-      className="border-[#2e2e2e]/30 text-[#2e2e2e] hover:bg-[#2e2e2e] hover:text-white hover:border-[#2e2e2e] rounded-none font-medium h-9 px-4 transition-all"
-    >
-      {showPreview ? (
-        <>
-          <EyeOff className="w-4 h-4 mr-1.5" />
-          Hide Preview
-        </>
-      ) : (
-        <>
-          <Eye className="w-4 h-4 mr-1.5" />
-          Show Preview
-        </>
-      )}
-    </Button>
+    <div className="absolute bottom-8 right-8 z-20">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setShowPreview(!showPreview)}
+        className="rounded-full shadow-xl w-12 h-12 bg-white border-primary/20 hover:bg-primary/5 hover:border-[#2e2e2e] hover:scale-110 transition-all duration-300"
+      >
+        {showPreview ? (
+          <Maximize2 className="w-5 h-5 text-[#2e2e2e]" />
+        ) : (
+          <LayoutTemplate className="w-5 h-5 text-[#2e2e2e]" />
+        )}
+      </Button>
+    </div>
   );
 }

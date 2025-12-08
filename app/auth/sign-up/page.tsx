@@ -26,7 +26,7 @@ export default function SignUpPage() {
       await account.create(ID.unique(), email, password, name);
       await account.createEmailPasswordSession(email, password);
       toast.success("Account created successfully!");
-      router.push("/generator");
+      router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Failed to create account");
     } finally {
@@ -38,7 +38,7 @@ export default function SignUpPage() {
     try {
       account.createOAuth2Session(
         OAuthProvider.Google,
-        `${window.location.origin}/generator`,
+        `${window.location.origin}/dashboard`,
         `${window.location.origin}/auth/sign-up`
       );
     } catch (error: any) {
