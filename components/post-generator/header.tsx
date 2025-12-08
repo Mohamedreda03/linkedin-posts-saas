@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { PenLine, LogOut, Send } from "lucide-react";
 import { HeaderProps } from "./types";
+import { CompactPlatformSelector } from "./compact-platform-selector";
 
 export function Header({
   user,
@@ -14,6 +15,10 @@ export function Header({
   isPosting,
   hasContent,
   onPublish,
+  selectedPlatforms,
+  onPlatformToggle,
+  connectedAccounts,
+  isLoadingAccounts,
 }: HeaderProps) {
   const { logout } = useAuth();
 
@@ -34,7 +39,7 @@ export function Header({
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {loading ? (
           <div className="w-9 h-9 rounded-full bg-primary/10 animate-pulse" />
         ) : user ? (
@@ -46,7 +51,7 @@ export function Header({
               <p className="text-xs text-[#C76A00] font-medium">Pro Member</p>
             </div>
             <Avatar className="w-10 h-10 border-2 border-[#2e2e2e]/20 shadow-md ring-2 ring-[#2e2e2e]/10 ring-offset-2 cursor-pointer hover:ring-[#2e2e2e]/30 transition-all">
-              <AvatarImage src="" />
+              <AvatarImage src="" alt={user.name ? `${user.name}'s avatar` : "User avatar"} />
               <AvatarFallback className="bg-linear-to-br from-[#2e2e2e] to-[#3b3b3b] text-white font-bold">
                 {user.name?.charAt(0)}
               </AvatarFallback>
@@ -62,10 +67,18 @@ export function Header({
           </div>
         ) : null}
 
+        {/* Platform Selector */}
+        <CompactPlatformSelector
+          selectedPlatforms={selectedPlatforms}
+          onPlatformToggle={onPlatformToggle}
+          connectedAccounts={connectedAccounts}
+          isLoading={isLoadingAccounts}
+        />
+
         {/* Publish Button */}
         <Button
           onClick={onPublish}
-          disabled={isPosting || !hasContent}
+          disabled={isPosting || !hasContent || selectedPlatforms.length === 0}
           className="bg-linear-to-r from-[#C76A00] to-[#E67E00] hover:from-[#B85F00] hover:to-[#D47000] text-white shadow-lg shadow-[#C76A00]/30 rounded-full px-6 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           {isPosting ? (

@@ -19,7 +19,7 @@ export function EditorArea({
 
   return (
     <div className="flex-1 overflow-y-auto bg-white/60">
-      <div className="max-w-3xl mx-auto py-12 px-8">
+      <div className="max-w-4xl mx-auto py-6 px-6">
         <textarea
           ref={textareaRef}
           value={content}

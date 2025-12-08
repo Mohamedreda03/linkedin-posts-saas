@@ -14,7 +14,6 @@ import {
   EditorArea,
   PreviewPane,
   PreviewToggle,
-  PlatformSelector,
 } from "./post-generator/index";
 
 export function PostGenerator() {
@@ -178,28 +177,47 @@ export function PostGenerator() {
       if (!account) continue;
 
       try {
-        // Currently only LinkedIn is fully implemented
-        if (platform === "linkedin") {
-          const response = await fetch("/api/linkedin/post", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              content,
-              userId: user.$id,
-              workspaceId: currentWorkspace.$id,
-              accountId: account.$id,
-            }),
-          });
-          
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.error || "Failed to post");
-          }
-          results.push({ platform, success: true });
-        } else {
-          // Placeholder for other platforms
-          results.push({ platform, success: false, error: "Not implemented yet" });
+        let endpoint = "";
+        let body: Record<string, unknown> = {
+          content,
+          userId: user.$id,
+          workspaceId: currentWorkspace.$id,
+          accountId: account.$id,
+        };
+
+        switch (platform) {
+          case "linkedin":
+            endpoint = "/api/linkedin/post";
+            break;
+          case "twitter":
+            endpoint = "/api/twitter/post";
+            break;
+          case "facebook":
+            endpoint = "/api/facebook/post";
+            break;
+          case "instagram":
+            endpoint = "/api/instagram/post";
+            // Instagram requires an image - for now we'll skip if no image
+            // You can add image upload functionality later
+            toast.error("Instagram posting requires an image. Coming soon!");
+            results.push({ platform, success: false, error: "Requires image" });
+            continue;
+          default:
+            results.push({ platform, success: false, error: "Not supported" });
+            continue;
         }
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to post");
+        }
+        results.push({ platform, success: true });
       } catch (error) {
         results.push({ 
           platform, 
@@ -230,24 +248,18 @@ export function PostGenerator() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-linear-to-br from-[#f8fafc] via-[#fafafa] to-[#f4f4f5]">
-      {/* Header Component */}
+      {/* Header Component with Platform Selector */}
       <Header
         user={user}
         loading={loading}
         isPosting={isPosting}
         hasContent={content.trim().length > 0}
         onPublish={handlePublish}
+        selectedPlatforms={selectedPlatforms}
+        onPlatformToggle={handlePlatformToggle}
+        connectedAccounts={connectedAccounts}
+        isLoadingAccounts={isLoadingAccounts}
       />
-
-      {/* Platform Selector */}
-      {user && currentWorkspace && (
-        <PlatformSelector
-          selectedPlatforms={selectedPlatforms}
-          onPlatformToggle={handlePlatformToggle}
-          connectedAccounts={connectedAccounts}
-          isLoading={isLoadingAccounts}
-        />
-      )}
 
       {/* Main Workspace */}
       <div className="flex-1 flex overflow-hidden relative">

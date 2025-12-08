@@ -56,8 +56,8 @@ export const HeroSection = forwardRef<HTMLElement>((_, ref) => {
           {/* LinkedIn Post Header */}
           <div className="p-4 flex gap-3">
             <Avatar className="w-12 h-12">
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src="https://github.com/shadcn.png" alt="Sarah Jenkins profile picture" />
+              <AvatarFallback>SJ</AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center justify-between">
