@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { getPosts } from "@/lib/api";
-import { DataTable } from "@/components/dashboard/data-table";
-import { columns } from "@/components/dashboard/columns";
-import { UserNav } from "@/components/dashboard/user-nav";
+import { DataTable } from "@/components/workspace/data-table";
+import { columns } from "@/components/workspace/columns";
+import { UserNav } from "@/components/workspace/user-nav";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -457,7 +457,7 @@ export default function WorkspaceDashboardPage() {
                     Your dashboard is empty. Create your first high-impact
                     LinkedIn post now.
                   </p>
-                  <Link href="/generator">
+                  <Link href={`/ws/${workspaceId}/compose`}>
                     <Button
                       size="lg"
                       className="rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold"

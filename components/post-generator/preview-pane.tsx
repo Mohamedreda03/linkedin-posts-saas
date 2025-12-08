@@ -1,13 +1,100 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Linkedin, Copy } from "lucide-react";
+import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import { LinkedInPreview } from "../linkedin-preview";
-import { PreviewPaneProps } from "./types";
+import { TwitterPreview } from "../twitter-preview";
+import { FacebookPreview } from "../facebook-preview";
+import { InstagramPreview } from "../instagram-preview";
+import { SocialPlatform, PLATFORM_CONFIG } from "@/lib/appwrite";
+import { cn } from "@/lib/utils";
+import { FaLinkedin, FaXTwitter, FaFacebook, FaInstagram } from "react-icons/fa6";
+import { Models } from "appwrite";
 
-export function PreviewPane({ showPreview, content, user }: PreviewPaneProps) {
+interface MultiPlatformPreviewPaneProps {
+  showPreview: boolean;
+  content: string;
+  user: Models.User<Models.Preferences> | null;
+  selectedPlatforms: SocialPlatform[];
+}
+
+const PLATFORM_ICONS: Record<SocialPlatform, React.ReactNode> = {
+  linkedin: <FaLinkedin className="w-4 h-4" />,
+  twitter: <FaXTwitter className="w-4 h-4" />,
+  facebook: <FaFacebook className="w-4 h-4" />,
+  instagram: <FaInstagram className="w-4 h-4" />,
+};
+
+export function PreviewPane({ 
+  showPreview, 
+  content, 
+  user,
+  selectedPlatforms = ["linkedin"],
+}: MultiPlatformPreviewPaneProps) {
+  const [activePreview, setActivePreview] = useState<SocialPlatform>(
+    selectedPlatforms[0] || "linkedin"
+  );
+
+  // Keep activePreview in sync with selectedPlatforms
+  const currentPreview = selectedPlatforms.includes(activePreview) 
+    ? activePreview 
+    : selectedPlatforms[0] || "linkedin";
+
+  const renderPreview = () => {
+    const previewContent = content || "Your post content will appear here as you type...\n\nStart writing to see the magic happen! ✨";
+    const authorName = user?.name || "Your Name";
+
+    switch (currentPreview) {
+      case "linkedin":
+        return (
+          <LinkedInPreview
+            content={previewContent}
+            authorName={authorName}
+            authorHeadline="Creator & Thought Leader"
+          />
+        );
+      case "twitter":
+        return (
+          <TwitterPreview
+            content={previewContent}
+            authorName={authorName}
+            authorHandle={`@${authorName.toLowerCase().replace(/\s+/g, "")}`}
+          />
+        );
+      case "facebook":
+        return (
+          <FacebookPreview
+            content={previewContent}
+            authorName={authorName}
+          />
+        );
+      case "instagram":
+        return (
+          <InstagramPreview
+            content={previewContent}
+            authorName={authorName}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getCharacterLimit = (platform: SocialPlatform): number => {
+    switch (platform) {
+      case "twitter": return 280;
+      case "linkedin": return 3000;
+      case "facebook": return 63206;
+      case "instagram": return 2200;
+      default: return 3000;
+    }
+  };
+
+  const charLimit = getCharacterLimit(currentPreview);
+  const isOverLimit = content.length > charLimit;
+
   return (
     <div
       className={`
@@ -19,18 +106,16 @@ export function PreviewPane({ showPreview, content, user }: PreviewPaneProps) {
         }
       `}
     >
-      <div className="h-14 border-b border-primary/10 flex items-center justify-between px-6 bg-white/80 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            Live Preview
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge className="bg-[#2e2e2e]/10 text-[#2e2e2e] border-[#2e2e2e]/20 font-medium">
-            <Linkedin className="w-3 h-3 mr-1" />
-            Feed
-          </Badge>
+      {/* Header with platform tabs */}
+      <div className="border-b border-primary/10 bg-white/80 backdrop-blur-sm">
+        {/* Top bar */}
+        <div className="h-12 flex items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              Preview
+            </span>
+          </div>
           <Button
             variant="ghost"
             size="sm"
@@ -38,28 +123,60 @@ export function PreviewPane({ showPreview, content, user }: PreviewPaneProps) {
               navigator.clipboard.writeText(content);
               toast.success("Copied to clipboard!");
             }}
-            className="text-muted-foreground hover:text-[#2e2e2e] hover:bg-[#2e2e2e]/10"
+            className="text-muted-foreground hover:text-foreground h-8"
           >
-            <Copy className="w-4 h-4" />
+            <Copy className="w-4 h-4 mr-1" />
+            Copy
           </Button>
         </div>
+
+        {/* Platform tabs */}
+        {selectedPlatforms.length > 1 && (
+          <div className="flex items-center gap-1 px-3 pb-2 overflow-x-auto">
+            {selectedPlatforms.map((platform) => {
+              const config = PLATFORM_CONFIG[platform];
+              const isActive = currentPreview === platform;
+              
+              return (
+                <button
+                  key={platform}
+                  onClick={() => setActivePreview(platform)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                    isActive
+                      ? "bg-white shadow-sm border"
+                      : "text-muted-foreground hover:bg-white/50"
+                  )}
+                  style={{
+                    color: isActive ? config.color : undefined,
+                    borderColor: isActive ? config.color + "40" : undefined,
+                  }}
+                >
+                  {PLATFORM_ICONS[platform]}
+                  <span className="hidden sm:inline">{config.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center">
+      {/* Preview content */}
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center">
         <div className="w-full max-w-[400px] space-y-4">
-          <LinkedInPreview
-            content={
-              content ||
-              "Your post content will appear here as you type...\n\nStart writing to see the magic happen! "
-            }
-            authorName={user?.name || "Your Name"}
-            authorImage={undefined}
-            authorHeadline="Creator & Thought Leader"
-          />
+          {renderPreview()}
 
-          <div className="text-center py-4">
+          {/* Character count and platform info */}
+          <div className="text-center py-3 space-y-2">
+            <div className={cn(
+              "text-sm font-medium",
+              isOverLimit ? "text-red-500" : "text-muted-foreground"
+            )}>
+              {content.length.toLocaleString()} / {charLimit.toLocaleString()} characters
+              {isOverLimit && " (over limit!)"}
+            </div>
             <p className="text-xs text-muted-foreground">
-              This is how your post will look in the LinkedIn feed
+              Preview for {PLATFORM_CONFIG[currentPreview].name}
             </p>
           </div>
         </div>
