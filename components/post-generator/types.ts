@@ -1,4 +1,4 @@
-import { SocialAccount } from "@/lib/appwrite";
+import { SocialAccount, SocialPlatform } from "@/lib/appwrite";
 import { Models } from "appwrite";
 
 // Common types used across post-generator components
@@ -24,6 +24,11 @@ export interface HeaderProps {
   isPosting: boolean;
   hasContent: boolean;
   onPublish: () => void;
+  // Platform selector props
+  selectedPlatforms: SocialPlatform[];
+  onPlatformToggle: (platform: SocialPlatform) => void;
+  connectedAccounts: SocialAccount[];
+  isLoadingAccounts?: boolean;
 }
 
 export interface ToolbarProps {

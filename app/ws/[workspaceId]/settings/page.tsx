@@ -4,14 +4,12 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
-import { PLATFORM_CONFIG, SocialPlatform } from "@/lib/appwrite";
+import { SocialPlatform } from "@/lib/appwrite";
 import { WORKSPACE_ICONS, WORKSPACE_COLORS } from "@/lib/constants/workspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { 
@@ -28,16 +26,13 @@ import {
   Twitter, 
   Facebook, 
   Instagram, 
-  Plus, 
   Trash2,
   ArrowLeft,
   Loader2,
-  AlertCircle,
-  Check,
-  Link2,
-  Palette,
-  AlertTriangle,
   Save,
+  Globe,
+  Layout,
+  ShieldAlert
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -59,6 +54,13 @@ const platformIcons: Record<SocialPlatform, React.ReactNode> = {
   twitter: <Twitter className="h-5 w-5" />,
   facebook: <Facebook className="h-5 w-5" />,
   instagram: <Instagram className="h-5 w-5" />,
+};
+
+const platformLabels: Record<SocialPlatform, string> = {
+  linkedin: "LinkedIn",
+  twitter: "Twitter / X",
+  facebook: "Facebook",
+  instagram: "Instagram",
 };
 
 async function fetchAccounts(workspaceId: string): Promise<SocialAccountPublic[]> {
@@ -182,6 +184,21 @@ export default function WorkspaceSettingsPage() {
     window.location.href = `/api/auth/link/linkedin?userId=${user.$id}&workspaceId=${workspaceId}`;
   };
 
+  const handleConnectTwitter = () => {
+    if (!user || !workspaceId) return;
+    window.location.href = `/api/auth/link/twitter?userId=${user.$id}&workspaceId=${workspaceId}`;
+  };
+
+  const handleConnectFacebook = () => {
+    if (!user || !workspaceId) return;
+    window.location.href = `/api/auth/link/facebook?userId=${user.$id}&workspaceId=${workspaceId}`;
+  };
+
+  const handleConnectInstagram = () => {
+    if (!user || !workspaceId) return;
+    window.location.href = `/api/auth/link/instagram?userId=${user.$id}&workspaceId=${workspaceId}`;
+  };
+
   const handleDeleteAccountClick = (account: SocialAccountPublic) => {
     setAccountToDelete(account);
     setDeleteAccountDialogOpen(true);
@@ -259,416 +276,314 @@ export default function WorkspaceSettingsPage() {
   // Check which platforms are connected
   const connectedPlatforms = new Set(accounts?.map(a => a.platform) || []);
 
-  const availablePlatforms: { platform: SocialPlatform; available: boolean }[] = [
-    { platform: "linkedin", available: true },
-    { platform: "twitter", available: false },
-    { platform: "facebook", available: false },
-    { platform: "instagram", available: false },
+  const availablePlatforms = [
+    { 
+      platform: "linkedin" as SocialPlatform, 
+      label: "LinkedIn",
+      description: "Connect your personal profile or company page.",
+      icon: <Linkedin className="h-5 w-5 text-[#0A66C2]" />,
+      handler: handleConnectLinkedIn 
+    },
+    { 
+      platform: "twitter" as SocialPlatform, 
+      label: "Twitter / X",
+      description: "Post tweets and threads directly.",
+      icon: <Twitter className="h-5 w-5 text-black" />,
+      handler: handleConnectTwitter 
+    },
+    { 
+      platform: "facebook" as SocialPlatform, 
+      label: "Facebook",
+      description: "Share updates to your pages.",
+      icon: <Facebook className="h-5 w-5 text-[#1877F2]" />,
+      handler: handleConnectFacebook 
+    },
+    { 
+      platform: "instagram" as SocialPlatform, 
+      label: "Instagram",
+      description: "Publish photos and captions.",
+      icon: <Instagram className="h-5 w-5 text-[#E4405F]" />,
+      handler: handleConnectInstagram 
+    },
   ];
 
-  // Show loading while checking workspace
-  if (workspacesLoading || (!currentWorkspace && workspaces.length > 0)) {
+  // Show skeleton while loading
+  if (authLoading || workspacesLoading || !currentWorkspace) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
-          <p className="text-zinc-500 font-medium">Loading workspace...</p>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-3xl mx-auto p-6 lg:p-10 space-y-10">
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Separator />
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-32" />
+              <div className="flex gap-3">
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-10 w-10 rounded-lg" />)}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  if (!currentWorkspace && !workspacesLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>No Workspace Selected</CardTitle>
-            <CardDescription>
-              Please create or select a workspace to view settings.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/onboarding">
-              <Button className="w-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Workspace
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto p-6 lg:p-10 space-y-8">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-10 pb-20">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link href={`/ws/${workspaceId}`}>
-            <Button variant="ghost" size="icon">
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-6">
+            <Link href={`/ws/${workspaceId}`} className="text-zinc-500 hover:text-zinc-900 transition-colors">
               <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              {currentWorkspace && (
-                <span
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-                  style={{ backgroundColor: `${currentWorkspace.color}20` }}
-                >
-                  {currentWorkspace.icon}
-                </span>
-              )}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Workspace Settings</h1>
-                <p className="text-gray-500">{currentWorkspace?.name}</p>
-              </div>
+            </Link>
+            <span className="text-zinc-300">/</span>
+            <span className="text-zinc-500 font-medium">Settings</span>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-zinc-900 tracking-tight mb-2">Workspace Settings</h1>
+              <p className="text-zinc-500 text-lg">Manage your workspace preferences and connected accounts.</p>
             </div>
+            {hasChanges && (
+              <Button 
+                onClick={handleSaveWorkspace} 
+                disabled={isSaving}
+                className="bg-zinc-900 text-white hover:bg-zinc-800 shadow-lg shadow-zinc-200 w-full sm:w-auto"
+              >
+                {isSaving ? <Spinner className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Changes
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Workspace Details Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Palette className="h-5 w-5 text-gray-500" />
-              <CardTitle>Workspace Details</CardTitle>
+        <div className="space-y-12">
+          {/* General Section */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 text-zinc-900 font-semibold text-lg">
+              <Layout className="h-5 w-5" />
+              <h2>General</h2>
             </div>
-            <CardDescription>
-              Customize your workspace name, icon, and color
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Workspace Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name">Workspace Name</Label>
-              <Input
-                id="name"
-                placeholder="e.g., My Personal Brand"
-                value={workspaceName}
-                onChange={(e) => setWorkspaceName(e.target.value)}
-                disabled={isSaving}
-              />
-            </div>
-
-            {/* Icon Selection */}
-            <div className="space-y-2">
-              <Label>Icon</Label>
-              <div className="flex flex-wrap gap-2">
-                {WORKSPACE_ICONS.map((icon) => (
-                  <button
-                    key={icon}
-                    type="button"
-                    onClick={() => setSelectedIcon(icon)}
-                    className={cn(
-                      "w-10 h-10 rounded-lg text-xl flex items-center justify-center transition-all",
-                      selectedIcon === icon
-                        ? "bg-primary/10 ring-2 ring-primary ring-offset-2"
-                        : "bg-gray-100 hover:bg-gray-200"
-                    )}
-                  >
-                    {icon}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Color Selection */}
-            <div className="space-y-2">
-              <Label>Color</Label>
-              <div className="flex flex-wrap gap-2">
-                {WORKSPACE_COLORS.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => setSelectedColor(color)}
-                    className={cn(
-                      "w-8 h-8 rounded-full transition-all",
-                      selectedColor === color
-                        ? "ring-2 ring-offset-2 ring-gray-400 scale-110"
-                        : "hover:scale-105"
-                    )}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Preview */}
-            <div className="p-4 bg-gray-50 rounded-lg border">
-              <Label className="text-xs text-gray-500 mb-2 block">Preview</Label>
-              <div className="flex items-center gap-3">
-                <span
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-                  style={{ backgroundColor: `${selectedColor}20` }}
-                >
-                  {selectedIcon}
-                </span>
-                <span className="font-medium">
-                  {workspaceName || "Your Workspace"}
-                </span>
-              </div>
-            </div>
-
-            {/* Save Button */}
-            {hasChanges && (
-              <Button onClick={handleSaveWorkspace} disabled={isSaving || !workspaceName.trim()}>
-                {isSaving ? (
-                  <>
-                    <Spinner className="h-4 w-4 mr-2" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
-        <Separator />
-
-        {/* Connected Accounts Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Link2 className="h-5 w-5 text-gray-500" />
-              <CardTitle>Connected Accounts</CardTitle>
-            </div>
-            <CardDescription>
-              Manage social media accounts for this workspace. Each platform can have only one connected account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2].map((i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-48" />
-                    </div>
-                    <Skeleton className="h-8 w-20" />
-                  </div>
-                ))}
-              </div>
-            ) : accounts && accounts.length > 0 ? (
-              <div className="space-y-4">
-                {accounts.map((account) => (
-                  <div
-                    key={account.$id}
-                    className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={account.accountImage} alt={account.accountName} />
-                      <AvatarFallback>
-                        {account.accountName.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900 truncate">
-                          {account.accountName}
-                        </span>
-                        <Badge variant="secondary" className="bg-green-100 text-green-700">
-                          <Check className="h-3 w-3 mr-1" />
-                          Connected
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span
-                          style={{ color: PLATFORM_CONFIG[account.platform].color }}
-                          className="flex items-center gap-1"
-                        >
-                          {platformIcons[account.platform]}
-                          {PLATFORM_CONFIG[account.platform].name}
-                        </span>
-                        {account.accountEmail && (
-                          <>
-                            <span>•</span>
-                            <span className="truncate">{account.accountEmail}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleDeleteAccountClick(account)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>No accounts connected to this workspace.</p>
-                <p className="text-sm">Connect your first account to start publishing.</p>
-              </div>
-            )}
-
-            {/* Connect Buttons */}
-            <div className="pt-4">
-              <Label className="text-sm font-medium mb-3 block">Connect Account</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {availablePlatforms.map(({ platform, available }) => {
-                  const isConnected = connectedPlatforms.has(platform);
-                  
-                  return (
-                    <Button
-                      key={platform}
-                      variant="outline"
-                      className={`h-auto py-3 justify-start gap-3 ${isConnected ? 'opacity-50' : ''}`}
-                      disabled={!available || isConnected}
-                      onClick={platform === "linkedin" ? handleConnectLinkedIn : undefined}
-                    >
-                      <div
-                        className="p-2 rounded-lg"
-                        style={{ backgroundColor: `${PLATFORM_CONFIG[platform].color}20` }}
-                      >
-                        <span style={{ color: PLATFORM_CONFIG[platform].color }}>
-                          {platformIcons[platform]}
-                        </span>
-                      </div>
-                      <div className="text-left">
-                        <div className="font-medium text-sm">{PLATFORM_CONFIG[platform].name}</div>
-                        <div className="text-xs text-gray-500">
-                          {isConnected 
-                            ? "Already connected" 
-                            : available 
-                              ? "Click to connect" 
-                              : "Coming soon"}
-                        </div>
-                      </div>
-                      {isConnected ? (
-                        <Check className="h-4 w-4 ml-auto text-green-500" />
-                      ) : available ? (
-                        <Plus className="h-4 w-4 ml-auto" />
-                      ) : null}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Separator />
-
-        {/* Danger Zone */}
-        <Card className="border-red-200">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-red-600">
-              <AlertTriangle className="h-5 w-5" />
-              <CardTitle className="text-red-600">Danger Zone</CardTitle>
-            </div>
-            <CardDescription>
-              Irreversible actions that affect your workspace
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
-              <div>
-                <h4 className="font-medium text-gray-900">Delete Workspace</h4>
-                <p className="text-sm text-gray-500">
-                  Permanently delete this workspace and all associated data
-                </p>
-              </div>
-              <Button 
-                variant="destructive"
-                onClick={() => setDeleteWorkspaceDialogOpen(true)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Delete Account Dialog */}
-        <Dialog open={deleteAccountDialogOpen} onOpenChange={setDeleteAccountDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Disconnect Account</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to disconnect{" "}
-                <span className="font-medium">{accountToDelete?.accountName}</span>? You will
-                need to reconnect to publish to this platform again.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDeleteAccountDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleConfirmDeleteAccount}
-                className="bg-red-500 hover:bg-red-600"
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Disconnect
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Delete Workspace Dialog */}
-        <Dialog open={deleteWorkspaceDialogOpen} onOpenChange={setDeleteWorkspaceDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="text-red-600">Delete Workspace</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete the workspace{" "}
-                <span className="font-medium">{currentWorkspace?.name}</span> and all
-                associated posts and connected accounts.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>
-                  Type <span className="font-mono font-bold">{currentWorkspace?.name}</span> to confirm
-                </Label>
+            <Separator />
+            
+            <div className="grid gap-8">
+              <div className="grid gap-3">
+                <Label htmlFor="name" className="text-base">Workspace Name</Label>
                 <Input
-                  placeholder="Workspace name"
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  id="name"
+                  value={workspaceName}
+                  onChange={(e) => setWorkspaceName(e.target.value)}
+                  className="max-w-md h-11 text-base"
+                  placeholder="e.g. Personal Brand"
                 />
+                <p className="text-sm text-zinc-500">This is the name visible in your dashboard.</p>
+              </div>
+
+              <div className="grid gap-3">
+                <Label className="text-base">Workspace Icon</Label>
+                <div className="flex flex-wrap gap-2">
+                  {WORKSPACE_ICONS.map((icon) => (
+                    <button
+                      key={icon}
+                      onClick={() => setSelectedIcon(icon)}
+                      className={cn(
+                        "w-10 h-10 rounded-lg text-xl flex items-center justify-center transition-all border",
+                        selectedIcon === icon
+                          ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900"
+                          : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                      )}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-3">
+                <Label className="text-base">Theme Color</Label>
+                <div className="flex flex-wrap gap-3">
+                  {WORKSPACE_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={cn(
+                        "w-8 h-8 rounded-full transition-all ring-offset-2",
+                        selectedColor === color
+                          ? "ring-2 ring-zinc-900 scale-110"
+                          : "hover:scale-110 ring-1 ring-transparent hover:ring-zinc-200"
+                      )}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setDeleteWorkspaceDialogOpen(false);
-                setDeleteConfirmText("");
-              }}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleDeleteWorkspace}
-                className="bg-red-500 hover:bg-red-600"
-                disabled={deleteConfirmText !== currentWorkspace?.name || isDeletingWorkspace}
-              >
-                {isDeletingWorkspace ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Delete Workspace
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </section>
+
+          {/* Integrations Section */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 text-zinc-900 font-semibold text-lg">
+              <Globe className="h-5 w-5" />
+              <h2>Integrations</h2>
+            </div>
+            <Separator />
+
+            <div className="space-y-6">
+              {/* Connected Accounts List */}
+              {accounts && accounts.length > 0 && (
+                <div className="grid gap-4">
+                  <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">Connected Accounts</h3>
+                  <div className="grid gap-3">
+                    {accounts.map((account) => (
+                      <div 
+                        key={account.$id} 
+                        className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 bg-white hover:border-zinc-300 transition-colors group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <Avatar className="h-10 w-10 border border-zinc-100">
+                              <AvatarImage src={account.accountImage} />
+                              <AvatarFallback>{account.accountName[0]}</AvatarFallback>
+                            </Avatar>
+                            <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm border border-zinc-100">
+                              {platformIcons[account.platform]}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="font-medium text-zinc-900">{account.accountName}</p>
+                            <p className="text-sm text-zinc-500 capitalize">{platformLabels[account.platform]}</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteAccountClick(account)}
+                          className="text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                        >
+                          Disconnect
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Available Platforms */}
+              <div className="grid gap-4">
+                <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">Available Platforms</h3>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {availablePlatforms.map((item) => {
+                    const isConnected = connectedPlatforms.has(item.platform);
+                    if (isConnected) return null;
+
+                    return (
+                      <button
+                        key={item.platform}
+                        onClick={item.handler}
+                        className="flex items-start gap-4 p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 hover:bg-white hover:border-zinc-300 hover:shadow-sm transition-all text-left group"
+                      >
+                        <div className="mt-1 p-2 bg-white rounded-lg border border-zinc-100 shadow-sm group-hover:scale-105 transition-transform">
+                          {item.icon}
+                        </div>
+                        <div>
+                          <p className="font-medium text-zinc-900">{item.label}</p>
+                          <p className="text-sm text-zinc-500 leading-relaxed mt-1">{item.description}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Danger Zone */}
+          <section className="space-y-6 pt-10">
+            <div className="flex items-center gap-2 text-red-600 font-semibold text-lg">
+              <ShieldAlert className="h-5 w-5" />
+              <h2>Danger Zone</h2>
+            </div>
+            <Separator className="bg-red-100" />
+            
+            <div className="rounded-xl border border-red-100 bg-red-50/30 p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h3 className="font-medium text-red-900">Delete Workspace</h3>
+                  <p className="text-sm text-red-700/80">
+                    Permanently delete this workspace and all its data. This action cannot be undone.
+                  </p>
+                </div>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => setDeleteWorkspaceDialogOpen(true)}
+                  className="bg-red-600 hover:bg-red-700 text-white shadow-sm shrink-0 w-full sm:w-auto"
+                >
+                  Delete Workspace
+                </Button>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
+
+      {/* Dialogs */}
+      <Dialog open={deleteAccountDialogOpen} onOpenChange={setDeleteAccountDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Disconnect Account</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to disconnect <strong>{accountToDelete?.accountName}</strong>? 
+              Scheduled posts for this account may fail.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteAccountDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmDeleteAccount}>Disconnect</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteWorkspaceDialogOpen} onOpenChange={setDeleteWorkspaceDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Workspace</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. Please type <strong>{currentWorkspace?.name}</strong> to confirm.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type workspace name to confirm"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setDeleteWorkspaceDialogOpen(false);
+              setDeleteConfirmText("");
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteWorkspace}
+              disabled={deleteConfirmText !== currentWorkspace?.name || isDeletingWorkspace}
+            >
+              {isDeletingWorkspace ? <Spinner className="mr-2 h-4 w-4" /> : null}
+              Delete Workspace
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

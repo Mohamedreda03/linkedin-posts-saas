@@ -132,8 +132,10 @@ export async function getPosts(
     queries.push(Query.equal("workspaceId", workspaceId));
   }
 
-  if (searchTerm) {
-    queries.push(Query.search("content", searchTerm));
+  if (searchTerm && searchTerm.trim()) {
+    // Use contains for partial matching (works without full-text index)
+    // Note: Appwrite Query.or requires specific syntax
+    queries.push(Query.contains("content", searchTerm.trim()));
   }
 
   if (status === "published") {

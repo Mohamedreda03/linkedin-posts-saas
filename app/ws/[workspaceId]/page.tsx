@@ -63,7 +63,10 @@ export default function WorkspaceDashboardPage() {
     if (workspaceId && workspaces.length > 0 && !workspacesLoading) {
       const exists = workspaces.find(w => w.$id === workspaceId);
       if (exists) {
-        setCurrentWorkspaceById(workspaceId);
+        // Only set if different to avoid unnecessary re-renders
+        if (currentWorkspace?.$id !== workspaceId) {
+          setCurrentWorkspaceById(workspaceId);
+        }
       } else {
         // Workspace not found, redirect to first workspace or onboarding
         if (workspaces.length > 0) {
@@ -73,7 +76,7 @@ export default function WorkspaceDashboardPage() {
         }
       }
     }
-  }, [workspaceId, workspaces, workspacesLoading, setCurrentWorkspaceById, router]);
+  }, [workspaceId, workspaces, workspacesLoading, setCurrentWorkspaceById, router, currentWorkspace?.$id]);
 
   const {
     data: posts,
@@ -143,18 +146,6 @@ export default function WorkspaceDashboardPage() {
     }
   };
 
-  // Show loading while checking workspace
-  if (workspacesLoading || (!currentWorkspace && workspaces.length > 0)) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
-          <p className="text-zinc-500 font-medium">Loading workspace...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-[1600px] mx-auto p-6 lg:p-10 space-y-8">
@@ -223,6 +214,9 @@ export default function WorkspaceDashboardPage() {
             </Tabs>
 
             {/* Workspace Selector Combobox */}
+            {workspacesLoading ? (
+              <div className="w-[250px] h-10 bg-zinc-100 animate-pulse rounded-lg" />
+            ) : (
             <Popover open={workspaceOpen} onOpenChange={setWorkspaceOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -230,7 +224,6 @@ export default function WorkspaceDashboardPage() {
                   role="combobox"
                   aria-expanded={workspaceOpen}
                   className="w-[250px] justify-between h-10 border-zinc-200 bg-white hover:bg-zinc-50"
-                  disabled={workspacesLoading}
                 >
                   {currentWorkspace ? (
                     <div className="flex items-center gap-2">
@@ -307,6 +300,7 @@ export default function WorkspaceDashboardPage() {
                 </Command>
               </PopoverContent>
             </Popover>
+            )}
 
             {/* Create Workspace Dialog */}
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -418,14 +412,14 @@ export default function WorkspaceDashboardPage() {
         </div>
 
         {/* Content Area */}
-        <div className="bg-white border border-zinc-100 rounded-xl shadow-sm overflow-hidden min-h-[500px]">
+        <div className="bg-white border border-zinc-100 rounded-xl shadow-sm overflow-hidden">
           {isLoading ? (
-            <div className="h-[500px] flex flex-col items-center justify-center gap-4">
+            <div className="h-[400px] flex flex-col items-center justify-center gap-4">
               <Loader2 className="h-8 w-8 animate-spin text-zinc-900" />
               <p className="text-zinc-500 font-medium">Loading your posts...</p>
             </div>
           ) : isError ? (
-            <div className="h-[500px] flex flex-col items-center justify-center text-center p-8">
+            <div className="h-[400px] flex flex-col items-center justify-center text-center p-8">
               <div className="h-12 w-12 bg-red-50 rounded-lg flex items-center justify-center mb-4 border border-red-100">
                 <LayoutGrid className="h-6 w-6 text-red-600" />
               </div>
@@ -446,7 +440,7 @@ export default function WorkspaceDashboardPage() {
           ) : (
             <div className="relative">
               {posts && posts.length === 0 ? (
-                <div className="h-[400px] flex flex-col items-center justify-center text-center p-8">
+                <div className="h-[300px] flex flex-col items-center justify-center text-center p-8">
                   <div className="h-16 w-16 bg-zinc-50 rounded-xl flex items-center justify-center mb-6 border border-zinc-100">
                     <List className="h-8 w-8 text-zinc-400" />
                   </div>
