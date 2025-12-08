@@ -5,7 +5,7 @@ export { AIPanel } from "./ai-panel";
 export { EditorArea } from "./editor-area";
 export { PreviewPane } from "./preview-pane";
 export { PreviewToggle } from "./preview-toggle";
-export { AccountStatusBar } from "./account-status-bar";
+export { PlatformSelector } from "./platform-selector";
 
 // Types
 export type {
@@ -14,8 +14,6 @@ export type {
   ToolbarProps,
   AIPanelProps,
   EditorAreaProps,
-  PreviewPaneProps,
-  AccountStatusBarProps,
   PreviewToggleProps,
 } from "./types";
 

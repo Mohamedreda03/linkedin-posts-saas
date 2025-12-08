@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { getTextDirection } from "@/lib/utils";
 import { toast } from "sonner";
-import { SocialAccount } from "@/lib/appwrite";
+import { SocialAccount, SocialPlatform } from "@/lib/appwrite";
 
 // Import sub-components
 import {
@@ -14,7 +14,7 @@ import {
   EditorArea,
   PreviewPane,
   PreviewToggle,
-  AccountStatusBar,
+  PlatformSelector,
 } from "./post-generator/index";
 
 export function PostGenerator() {
@@ -24,9 +24,10 @@ export function PostGenerator() {
   const [isPosting, setIsPosting] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   
-  // Workspace LinkedIn account
-  const [linkedInAccount, setLinkedInAccount] = useState<SocialAccount | null>(null);
-  const [isLoadingAccount, setIsLoadingAccount] = useState(false);
+  // Multi-platform accounts
+  const [connectedAccounts, setConnectedAccounts] = useState<SocialAccount[]>([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>(["linkedin"]);
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
 
   // AI Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -39,36 +40,51 @@ export function PostGenerator() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Fetch LinkedIn account for current workspace
+  // Fetch all connected accounts for current workspace
   useEffect(() => {
-    async function fetchWorkspaceAccount() {
+    async function fetchWorkspaceAccounts() {
       if (!currentWorkspace) {
-        setLinkedInAccount(null);
+        setConnectedAccounts([]);
         return;
       }
       
-      setIsLoadingAccount(true);
+      setIsLoadingAccounts(true);
       try {
         const response = await fetch(
-          `/api/accounts?workspaceId=${currentWorkspace.$id}&platform=linkedin`
+          `/api/accounts?workspaceId=${currentWorkspace.$id}`
         );
         const data = await response.json();
         
         if (data.accounts && data.accounts.length > 0) {
-          setLinkedInAccount(data.accounts[0]);
+          setConnectedAccounts(data.accounts);
+          // Auto-select connected platforms
+          const platforms = data.accounts.map((acc: SocialAccount) => acc.platform);
+          setSelectedPlatforms(platforms.filter((p: SocialPlatform, i: number, arr: SocialPlatform[]) => arr.indexOf(p) === i));
         } else {
-          setLinkedInAccount(null);
+          setConnectedAccounts([]);
+          setSelectedPlatforms([]);
         }
       } catch (error) {
-        console.error("Failed to fetch workspace account:", error);
-        setLinkedInAccount(null);
+        console.error("Failed to fetch workspace accounts:", error);
+        setConnectedAccounts([]);
       } finally {
-        setIsLoadingAccount(false);
+        setIsLoadingAccounts(false);
       }
     }
     
-    fetchWorkspaceAccount();
+    fetchWorkspaceAccounts();
   }, [currentWorkspace]);
+
+  const handlePlatformToggle = (platform: SocialPlatform) => {
+    setSelectedPlatforms((prev) =>
+      prev.includes(platform)
+        ? prev.filter((p) => p !== platform)
+        : [...prev, platform]
+    );
+  };
+
+  // Get LinkedIn account for backwards compatibility
+  const linkedInAccount = connectedAccounts.find((acc) => acc.platform === "linkedin") || null;
 
   const textDirection = getTextDirection(content);
 
@@ -139,36 +155,74 @@ export function PostGenerator() {
       toast.error("Please select a workspace");
       return;
     }
-    if (!linkedInAccount) {
-      toast.error("Please connect a LinkedIn account in settings");
+    if (selectedPlatforms.length === 0) {
+      toast.error("Please select at least one platform");
+      return;
+    }
+
+    // Check if all selected platforms have connected accounts
+    const missingPlatforms = selectedPlatforms.filter(
+      (platform) => !connectedAccounts.find((acc) => acc.platform === platform)
+    );
+    if (missingPlatforms.length > 0) {
+      toast.error(`Please connect accounts for: ${missingPlatforms.join(", ")}`);
       return;
     }
     
     setIsPosting(true);
-    try {
-      const response = await fetch("/api/linkedin/post", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          content,
-          userId: user.$id,
-          workspaceId: currentWorkspace.$id,
-          accountId: linkedInAccount.$id,
-        }),
-      });
-      
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to post");
+    const results: { platform: string; success: boolean; error?: string }[] = [];
+
+    // Publish to each selected platform
+    for (const platform of selectedPlatforms) {
+      const account = connectedAccounts.find((acc) => acc.platform === platform);
+      if (!account) continue;
+
+      try {
+        // Currently only LinkedIn is fully implemented
+        if (platform === "linkedin") {
+          const response = await fetch("/api/linkedin/post", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              content,
+              userId: user.$id,
+              workspaceId: currentWorkspace.$id,
+              accountId: account.$id,
+            }),
+          });
+          
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to post");
+          }
+          results.push({ platform, success: true });
+        } else {
+          // Placeholder for other platforms
+          results.push({ platform, success: false, error: "Not implemented yet" });
+        }
+      } catch (error) {
+        results.push({ 
+          platform, 
+          success: false, 
+          error: error instanceof Error ? error.message : "Failed" 
+        });
       }
-      
-      const accountName = data.accountName || linkedInAccount?.accountName || "LinkedIn";
-      toast.success(`Published to ${accountName}!`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to publish");
-    } finally {
-      setIsPosting(false);
     }
+
+    // Show results
+    const successful = results.filter((r) => r.success);
+    const failed = results.filter((r) => !r.success);
+
+    if (successful.length > 0) {
+      toast.success(`Published to ${successful.map((r) => r.platform).join(", ")}!`);
+    }
+    if (failed.length > 0) {
+      failed.forEach((r) => {
+        toast.error(`${r.platform}: ${r.error}`);
+      });
+    }
+
+    setIsPosting(false);
   };
 
   const charCount = content.length;
@@ -185,13 +239,13 @@ export function PostGenerator() {
         onPublish={handlePublish}
       />
 
-      {/* Workspace Account Status Bar */}
+      {/* Platform Selector */}
       {user && currentWorkspace && (
-        <AccountStatusBar
-          linkedInAccount={linkedInAccount}
-          isLoadingAccount={isLoadingAccount}
-          workspaceId={currentWorkspace.$id}
-          workspaceName={currentWorkspace.name}
+        <PlatformSelector
+          selectedPlatforms={selectedPlatforms}
+          onPlatformToggle={handlePlatformToggle}
+          connectedAccounts={connectedAccounts}
+          isLoading={isLoadingAccounts}
         />
       )}
 
@@ -252,6 +306,7 @@ export function PostGenerator() {
           showPreview={showPreview}
           content={content}
           user={user}
+          selectedPlatforms={selectedPlatforms}
         />
       </div>
     </div>
