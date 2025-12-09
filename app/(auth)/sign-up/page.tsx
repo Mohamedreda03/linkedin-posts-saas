@@ -39,7 +39,7 @@ export default function SignUpPage() {
       account.createOAuth2Session(
         OAuthProvider.Google,
         `${window.location.origin}/onboarding`,
-        `${window.location.origin}/auth/sign-up`
+        `${window.location.origin}/sign-up`
       );
     } catch (error: any) {
       toast.error(error.message || "Failed to initiate Google sign up");
@@ -142,7 +142,7 @@ export default function SignUpPage() {
             Already have an account?{" "}
           </span>
           <Link
-            href="/auth/sign-in"
+            href="/sign-in"
             className="text-primary hover:underline font-medium"
           >
             Sign in

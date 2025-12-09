@@ -22,7 +22,7 @@ function ResetPasswordForm() {
   useEffect(() => {
     if (!userId || !secret) {
       toast.error("Invalid reset link");
-      router.push("/auth/forgot-password");
+      router.push("/forgot-password");
     }
   }, [userId, secret, router]);
 
@@ -39,7 +39,7 @@ function ResetPasswordForm() {
       if (userId && secret) {
         await account.updateRecovery(userId, secret, password);
         toast.success("Password reset successfully!");
-        router.push("/auth/sign-in");
+        router.push("/sign-in");
       }
     } catch (error: any) {
       toast.error(error.message || "Failed to reset password");

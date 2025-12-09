@@ -178,7 +178,7 @@ export function PostGenerator() {
 
       try {
         let endpoint = "";
-        let body: Record<string, unknown> = {
+        const body: Record<string, unknown> = {
           content,
           userId: user.$id,
           workspaceId: currentWorkspace.$id,

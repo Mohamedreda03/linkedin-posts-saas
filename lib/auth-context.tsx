@@ -124,30 +124,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (loading) return;
 
+    // Public routes that don't require authentication (accessible to everyone)
     const publicRoutes = [
       "/",
-      "/auth/sign-in",
-      "/auth/sign-up",
-      "/auth/forgot-password",
-      "/auth/reset-password",
+      "/sign-in",
+      "/sign-up",
+      "/forgot-password",
+      "/reset-password",
+    ];
+    
+    // Auth routes - redirect to dashboard if already authenticated
+    const authRoutes = [
+      "/sign-in",
+      "/sign-up",
+      "/forgot-password",
+      "/reset-password",
+    ];
+    
+    // Routes that require authentication but are always accessible to logged-in users
+    const authenticatedOnlyRoutes = [
       "/onboarding",
     ];
-    const isPublicRoute = publicRoutes.includes(pathname);
 
+    const isPublicRoute = publicRoutes.includes(pathname);
+    const isAuthRoute = authRoutes.includes(pathname);
+    const isAuthenticatedOnlyRoute = authenticatedOnlyRoutes.includes(pathname);
+    const isWorkspaceRoute = pathname.startsWith("/ws/");
+
+    // Redirect unauthenticated users trying to access protected routes
     if (!user && !isPublicRoute) {
-      router.push("/auth/sign-in");
-    } else if (
-      user &&
-      (pathname === "/auth/sign-in" || pathname === "/auth/sign-up")
-    ) {
-      // Check if user has workspaces, if not redirect to onboarding
-      if (workspaces.length === 0 && !workspacesLoading) {
+      router.push("/sign-in");
+      return;
+    }
+    
+    // Redirect authenticated users away from auth pages (sign-in, sign-up, etc.)
+    if (user && isAuthRoute) {
+      if (workspacesLoading) return; // Wait for workspaces to load
+      
+      if (workspaces.length === 0) {
         router.push("/onboarding");
       } else if (currentWorkspace) {
         router.push(`/ws/${currentWorkspace.$id}`);
+      } else if (workspaces.length > 0) {
+        router.push(`/ws/${workspaces[0].$id}`);
       }
     }
-  }, [user, loading, pathname, router, workspaces, workspacesLoading]);
+  }, [user, loading, pathname, router, workspaces, workspacesLoading, currentWorkspace]);
 
   return (
     <AuthContext.Provider value={{ 

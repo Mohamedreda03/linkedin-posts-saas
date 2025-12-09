@@ -31,7 +31,7 @@ export default function OnboardingPage() {
   // Redirect to sign-in if not authenticated
   useEffect(() => {
     if (!loading && !user) {
-      router.replace("/auth/sign-in");
+      router.replace("/sign-in");
     }
   }, [loading, user, router]);
 

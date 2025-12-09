@@ -37,7 +37,7 @@ export default function SignInPage() {
       account.createOAuth2Session(
         OAuthProvider.Google,
         `${window.location.origin}/onboarding`,
-        `${window.location.origin}/auth/sign-in`
+        `${window.location.origin}/sign-in`
       );
     } catch (error: any) {
       toast.error(error.message || "Failed to initiate Google sign in");
@@ -109,7 +109,7 @@ export default function SignInPage() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
                 <Link
-                  href="/auth/forgot-password"
+                  href="/forgot-password"
                   className="text-sm text-primary hover:underline"
                 >
                   Forgot password?
@@ -135,7 +135,7 @@ export default function SignInPage() {
             Don&apos;t have an account?{" "}
           </span>
           <Link
-            href="/auth/sign-up"
+            href="/sign-up"
             className="text-primary hover:underline font-medium"
           >
             Sign up

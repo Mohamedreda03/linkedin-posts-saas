@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
     try {
       await account.createRecovery(
         email,
-        `${window.location.origin}/auth/reset-password`
+        `${window.location.origin}/reset-password`
       );
       setIsSubmitted(true);
       toast.success("Password reset email sent!");
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
 
         <div className="text-center text-sm">
           <Link
-            href="/auth/sign-in"
+            href="/sign-in"
             className="text-muted-foreground hover:text-primary flex items-center justify-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
