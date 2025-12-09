@@ -1,5 +1,8 @@
-const { Client, Databases, Permission, Role } = require("node-appwrite");
-require("dotenv").config({ path: ".env.local" });
+// const { Client, Databases, Permission, Role } = require("node-appwrite");
+import { Client, Databases, Permission, Role } from "node-appwrite";
+// require("dotenv").config({ path: ".env.local" });
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
 
 const client = new Client()
   .setEndpoint(
@@ -52,8 +55,8 @@ async function setupDatabase() {
     const attributes = [
       { key: "userId", type: "string", size: 36, required: true },
       { key: "workspaceId", type: "string", size: 36, required: false }, // Will be required after migration
-      { key: "content", type: "string", size: 5000, required: true },
-      { key: "topic", type: "string", size: 255, required: true },
+      { key: "content", type: "string", size: 2000, required: false }, // Made optional, reduced size
+      { key: "topic", type: "string", size: 255, required: false }, // Made optional
       { key: "tone", type: "string", size: 50, required: false },
       { key: "isPublished", type: "boolean", required: false, default: false },
       { key: "publishedTo", type: "string", size: 50, required: false }, // Platform published to
@@ -66,6 +69,7 @@ async function setupDatabase() {
       { key: "mediaUrls", type: "string", size: 2000, required: false, default: "[]" }, // JSON array of media URLs
       { key: "retryCount", type: "integer", required: false, default: 0 }, // Number of retry attempts
       { key: "lastRetryAt", type: "string", size: 50, required: false }, // Last retry timestamp
+      { key: "platformContent", type: "string", size: 2000, required: false, default: "{}" }, // JSON object for platform-specific content
     ];
 
     console.log("Checking attributes...");

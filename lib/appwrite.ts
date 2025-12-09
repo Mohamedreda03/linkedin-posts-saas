@@ -101,6 +101,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
       isPublished: false, // للتوافق مع الكود القديم
       publishedTo: "",
       publishedAt: "",
+      platformContent: JSON.stringify(input.platformContent || {}),
     };
 
     const response = await databases.createDocument(
@@ -139,6 +140,8 @@ export async function updatePost(
       data.mediaUrls = JSON.stringify(input.mediaUrls);
     if (input.retryCount !== undefined) data.retryCount = input.retryCount;
     if (input.lastRetryAt !== undefined) data.lastRetryAt = input.lastRetryAt;
+    if (input.platformContent !== undefined)
+      data.platformContent = JSON.stringify(input.platformContent);
 
     const response = await databases.updateDocument(
       APPWRITE_CONFIG.databaseId,
@@ -296,6 +299,7 @@ function parsePost(doc: any): Post {
     isPublished: doc.isPublished || false,
     publishedTo: doc.publishedTo || undefined,
     publishedAt: doc.publishedAt || undefined,
+    platformContent: JSON.parse(doc.platformContent || "{}"),
   };
 }
 

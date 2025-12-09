@@ -19,12 +19,36 @@ STRICT CONSTRAINTS:
 - Native fluency in target language/dialect.
 - One idea per paragraph.`;
 
+export const MULTI_PLATFORM_SYSTEM_PROMPT = `Role: Expert Social Media Content Strategist.
+Goal: Create optimized content for multiple platforms based on a single topic.
+
+PLATFORM_RULES:
+1. LINKEDIN: Professional, storytelling, value-driven. 150-300 words. Hook + Body + Takeaway + CTA.
+2. TWITTER/X: Punchy, single tweet. STRICT LIMIT: UNDER 280 CHARACTERS. No threads. Casual, direct. Use abbreviations if needed.
+3. FACEBOOK: Community-focused, conversational, slightly longer than Twitter. Engaging questions.
+4. INSTAGRAM: Visual-caption focused. Emotional, lifestyle-oriented. Heavy emoji use allowed.
+
+OUTPUT FORMAT:
+You must return a valid JSON object with the following keys:
+{
+  "linkedin": "content string...",
+  "twitter": "content string...",
+  "facebook": "content string...",
+  "instagram": "content string..."
+}
+
+STRICT CONSTRAINTS:
+- Native fluency in target language/dialect.
+- Adapt tone to platform culture.
+- Return ONLY valid JSON. No markdown formatting around the JSON.`;
+
 export interface GenerationParams {
   topic: string;
   tone: string;
   dialect: string;
   length: "short" | "medium" | "long";
   useEmoji: boolean;
+  platforms?: string[]; // Optional list of platforms to generate for
 }
 
 export function buildUserPrompt(params: GenerationParams): string {
@@ -44,15 +68,15 @@ export function buildUserPrompt(params: GenerationParams): string {
     storytelling: "Narrative-driven, emotional, vivid.",
   };
 
-  return `TASK: Generate LinkedIn Post
+  return `TASK: Generate Social Media Content
 TOPIC: ${topic}
 SPECS:
 - Tone: ${toneDescriptions[tone] || tone}
 - Lang: ${dialect} (Native fluency)
-- Len: ${lengthGuide[length]}
-- Emoji: ${useEmoji ? "1-3 max" : "None"}
+- Len (LinkedIn): ${lengthGuide[length]}
+- Emoji: ${useEmoji ? "Optimized for platform" : "None"}
 
-OUTPUT: Post content ONLY. Start with Hook. End with hashtags.`;
+OUTPUT: JSON object with content for linkedin, twitter, facebook, instagram.`;
 }
 
 export const DIALECT_OPTIONS = [

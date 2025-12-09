@@ -1,72 +1,112 @@
 "use client";
 
-import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
-import { PenLine, LogOut, Send } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ArrowLeft, Send, Save, Clock, ChevronDown, Check, AlertCircle } from "lucide-react";
 import { HeaderProps } from "./types";
 import { CompactPlatformSelector } from "./compact-platform-selector";
 
 export function Header({
-  user,
-  loading,
   isPosting,
   hasContent,
+  topic,
+  onTopicChange,
+  onTopicBlur,
   onPublish,
+  onSaveDraft,
+  onSchedule,
+  saveStatus,
+  lastSavedAt,
+  onBack,
   selectedPlatforms,
   onPlatformToggle,
   connectedAccounts,
   isLoadingAccounts,
 }: HeaderProps) {
-  const { logout } = useAuth();
+  // Format last saved time
+  const getLastSavedText = () => {
+    if (!lastSavedAt) return "";
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - lastSavedAt.getTime()) / 1000);
+    
+    if (diff < 60) return "just now";
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return lastSavedAt.toLocaleDateString();
+  };
+
+  // Save status indicator
+  const SaveStatusIndicator = () => {
+    switch (saveStatus) {
+      case "saving":
+        return (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Spinner size="sm" />
+            <span>Saving...</span>
+          </div>
+        );
+      case "saved":
+        return (
+          <div className="flex items-center gap-2 text-xs text-green-600">
+            <Check className="w-3 h-3" />
+            <span>Saved {getLastSavedText()}</span>
+          </div>
+        );
+      case "error":
+        return (
+          <div className="flex items-center gap-2 text-xs text-red-600">
+            <AlertCircle className="w-3 h-3" />
+            <span>Save failed</span>
+          </div>
+        );
+      case "unsaved":
+        return (
+          <div className="flex items-center gap-2 text-xs text-amber-600">
+            <AlertCircle className="w-3 h-3" />
+            <span>Unsaved changes</span>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <header className="h-16 border-b border-primary/10 bg-white/90 backdrop-blur-xl flex items-center justify-between px-6 z-20 sticky top-0 shadow-sm">
-      <div className="flex items-center gap-3">
-        {/* Logo */}
-        <div className="w-10 h-10 bg-linear-to-br from-[#2e2e2e] to-[#3b3b3b] rounded-xl flex items-center justify-center shadow-lg shadow-[#2e2e2e]/30">
-          <PenLine className="w-5 h-5 text-white" />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-xl tracking-tight bg-linear-to-r from-[#2e2e2e] to-[#3b3b3b] bg-clip-text text-transparent">
-            PostCraft
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onBack}
+          className="rounded-full border border-transparent hover:border-zinc-200 hover:bg-zinc-50"
+          aria-label="Back to workspace"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+        <div className="grid items-center">
+          <span className="col-start-1 row-start-1 invisible whitespace-pre text-lg font-semibold px-0 py-0 pointer-events-none">
+            {topic || "Edit post title"}
           </span>
-          <Badge className="bg-linear-to-r from-[#C76A00] to-[#E67E00] text-white text-[10px] font-bold border-0 shadow-sm">
-            PRO
-          </Badge>
+          <input
+            value={topic}
+            onChange={(e) => onTopicChange(e.target.value)}
+            onBlur={onTopicBlur}
+            placeholder="Edit post title"
+            className="col-start-1 row-start-1 w-full min-w-[120px] text-lg font-semibold bg-transparent border-b border-transparent focus:border-zinc-900 focus:outline-none px-0 py-0 placeholder:text-zinc-400"
+          />
+        </div>
+        <div className="hidden md:block pl-3 border-l border-primary/10">
+          <SaveStatusIndicator />
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {loading ? (
-          <div className="w-9 h-9 rounded-full bg-primary/10 animate-pulse" />
-        ) : user ? (
-          <div className="flex items-center gap-3 pl-4 border-l border-primary/10">
-            <div className="text-right hidden md:block">
-              <p className="text-sm font-semibold text-foreground">
-                {user.name}
-              </p>
-              <p className="text-xs text-[#C76A00] font-medium">Pro Member</p>
-            </div>
-            <Avatar className="w-10 h-10 border-2 border-[#2e2e2e]/20 shadow-md ring-2 ring-[#2e2e2e]/10 ring-offset-2 cursor-pointer hover:ring-[#2e2e2e]/30 transition-all">
-              <AvatarImage src="" alt={user.name ? `${user.name}'s avatar` : "User avatar"} />
-              <AvatarFallback className="bg-linear-to-br from-[#2e2e2e] to-[#3b3b3b] text-white font-bold">
-                {user.name?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => logout()}
-              className="text-muted-foreground hover:text-red-500 hover:bg-red-50"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-        ) : null}
-
+      <div className="flex items-center gap-3 pl-4 border-l border-primary/10">
         {/* Platform Selector */}
         <CompactPlatformSelector
           selectedPlatforms={selectedPlatforms}
@@ -75,24 +115,66 @@ export function Header({
           isLoading={isLoadingAccounts}
         />
 
-        {/* Publish Button */}
+        {/* Save Draft Button */}
         <Button
-          onClick={onPublish}
-          disabled={isPosting || !hasContent || selectedPlatforms.length === 0}
-          className="bg-linear-to-r from-[#C76A00] to-[#E67E00] hover:from-[#B85F00] hover:to-[#D47000] text-white shadow-lg shadow-[#C76A00]/30 rounded-full px-6 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          onClick={onSaveDraft}
+          disabled={!hasContent || saveStatus === "saving"}
+          variant="outline"
+          className="rounded-full px-5 font-semibold transition-all hover:scale-105 active:scale-95"
         >
-          {isPosting ? (
+          {saveStatus === "saving" ? (
             <>
-              <Spinner size="sm" className="text-white mr-2" />
-              Publishing...
+              <Spinner size="sm" className="mr-2" />
+              Saving...
             </>
           ) : (
             <>
-              <Send className="w-4 h-4 mr-2" />
-              Publish Now
+              <Save className="w-4 h-4 mr-2" />
+              Save Draft
             </>
           )}
         </Button>
+
+        {/* Publish Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              disabled={isPosting || !hasContent || selectedPlatforms.length === 0}
+              className="bg-linear-to-r from-[#C76A00] to-[#E67E00] hover:from-[#B85F00] hover:to-[#D47000] text-white shadow-lg shadow-[#C76A00]/30 rounded-full px-6 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              {isPosting ? (
+                <>
+                  <Spinner size="sm" className="text-white mr-2" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Publish
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem
+              onClick={onPublish}
+              disabled={isPosting || !hasContent || selectedPlatforms.length === 0}
+              className="cursor-pointer"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Publish Now
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={onSchedule}
+              disabled={isPosting || !hasContent || selectedPlatforms.length === 0}
+              className="cursor-pointer"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              Schedule Post
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

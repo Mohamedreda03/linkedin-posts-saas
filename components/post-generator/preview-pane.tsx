@@ -11,13 +11,17 @@ import { InstagramPreview } from "../instagram-preview";
 import { SocialPlatform, PLATFORM_CONFIG } from "@/lib/appwrite";
 import { cn } from "@/lib/utils";
 import { FaLinkedin, FaXTwitter, FaFacebook, FaInstagram } from "react-icons/fa6";
+import { PlatformContent } from "@/lib/types/post";
 import { Models } from "appwrite";
 
 interface MultiPlatformPreviewPaneProps {
   showPreview: boolean;
-  content: string;
+  content: string; // Fallback content
+  platformContent?: PlatformContent;
   user: Models.User<Models.Preferences> | null;
   selectedPlatforms: SocialPlatform[];
+  activePlatform?: SocialPlatform;
+  onPreviewChange?: (platform: SocialPlatform) => void;
 }
 
 const PLATFORM_ICONS: Record<SocialPlatform, React.ReactNode> = {
@@ -30,23 +34,36 @@ const PLATFORM_ICONS: Record<SocialPlatform, React.ReactNode> = {
 export function PreviewPane({ 
   showPreview, 
   content, 
+  platformContent = {},
   user,
   selectedPlatforms = ["linkedin"],
+  activePlatform,
+  onPreviewChange,
 }: MultiPlatformPreviewPaneProps) {
-  const [activePreview, setActivePreview] = useState<SocialPlatform>(
+  const [internalActivePreview, setInternalActivePreview] = useState<SocialPlatform>(
     selectedPlatforms[0] || "linkedin"
   );
 
-  // Keep activePreview in sync with selectedPlatforms
-  const currentPreview = selectedPlatforms.includes(activePreview) 
-    ? activePreview 
+  // Use controlled or uncontrolled state
+  const currentPreview = activePlatform || internalActivePreview;
+  
+  // Ensure current preview is valid
+  const validPreview = selectedPlatforms.includes(currentPreview) 
+    ? currentPreview 
     : selectedPlatforms[0] || "linkedin";
 
+  const handlePreviewChange = (platform: SocialPlatform) => {
+    setInternalActivePreview(platform);
+    onPreviewChange?.(platform);
+  };
+
   const renderPreview = () => {
-    const previewContent = content || "Your post content will appear here as you type...\n\nStart writing to see the magic happen! ✨";
+    // Get content for the specific platform, fallback to generic content
+    const specificContent = platformContent[validPreview] || content;
+    const previewContent = specificContent || "Your post content will appear here as you type...\n\nStart writing to see the magic happen! ✨";
     const authorName = user?.name || "Your Name";
 
-    switch (currentPreview) {
+    switch (validPreview) {
       case "linkedin":
         return (
           <LinkedInPreview
@@ -92,8 +109,9 @@ export function PreviewPane({
     }
   };
 
-  const charLimit = getCharacterLimit(currentPreview);
-  const isOverLimit = content.length > charLimit;
+  const charLimit = getCharacterLimit(validPreview);
+  const currentContent = platformContent[validPreview] || content;
+  const isOverLimit = currentContent.length > charLimit;
 
   return (
     <div
@@ -120,7 +138,8 @@ export function PreviewPane({
             variant="ghost"
             size="sm"
             onClick={() => {
-              navigator.clipboard.writeText(content);
+              const specificContent = platformContent[validPreview] || content;
+              navigator.clipboard.writeText(specificContent);
               toast.success("Copied to clipboard!");
             }}
             className="text-muted-foreground hover:text-foreground h-8"
@@ -135,12 +154,12 @@ export function PreviewPane({
           <div className="flex items-center gap-1 px-3 pb-2 overflow-x-auto">
             {selectedPlatforms.map((platform) => {
               const config = PLATFORM_CONFIG[platform];
-              const isActive = currentPreview === platform;
+              const isActive = validPreview === platform;
               
               return (
                 <button
                   key={platform}
-                  onClick={() => setActivePreview(platform)}
+                  onClick={() => handlePreviewChange(platform)}
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
                     isActive
@@ -172,11 +191,11 @@ export function PreviewPane({
               "text-sm font-medium",
               isOverLimit ? "text-red-500" : "text-muted-foreground"
             )}>
-              {content.length.toLocaleString()} / {charLimit.toLocaleString()} characters
+              {currentContent.length.toLocaleString()} / {charLimit.toLocaleString()} characters
               {isOverLimit && " (over limit!)"}
             </div>
             <p className="text-xs text-muted-foreground">
-              Preview for {PLATFORM_CONFIG[currentPreview].name}
+              Preview for {PLATFORM_CONFIG[validPreview].name}
             </p>
           </div>
         </div>

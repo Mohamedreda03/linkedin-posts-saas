@@ -21,6 +21,54 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { useParams, useRouter } from "next/navigation";
+
+function ActionsCell({ post }: { post: Post }) {
+  const router = useRouter();
+  const params = useParams();
+  const workspaceId =
+    post.workspaceId || (params?.workspaceId as string | undefined);
+
+  const handleEdit = () => {
+    if (!workspaceId) {
+      toast.error("Workspace not found");
+      return;
+    }
+    router.push(`/ws/${workspaceId}/compose/${post.$id}`);
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem
+          onClick={() => {
+            navigator.clipboard.writeText(post.content);
+            toast.success("Content copied to clipboard");
+          }}
+        >
+          <Copy className="mr-2 h-4 w-4" />
+          Copy Content
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleEdit}>
+          <PenSquare className="mr-2 h-4 w-4" />
+          Edit Post
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-red-600 focus:text-red-600">
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export const columns: ColumnDef<Post>[] = [
   {
@@ -87,40 +135,6 @@ export const columns: ColumnDef<Post>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const post = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => {
-                navigator.clipboard.writeText(post.content);
-                toast.success("Content copied to clipboard");
-              }}
-            >
-              <Copy className="mr-2 h-4 w-4" />
-              Copy Content
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <PenSquare className="mr-2 h-4 w-4" />
-              Edit Post
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600 focus:text-red-600">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <ActionsCell post={row.original} />,
   },
 ];

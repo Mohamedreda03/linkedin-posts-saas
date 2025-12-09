@@ -40,6 +40,65 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 
+// Create Post Button Component
+function CreatePostButton({ workspaceId, userId }: { workspaceId: string; userId?: string }) {
+  const router = useRouter();
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreatePost = async () => {
+    if (!userId) {
+      toast.error("User not authenticated");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: "",
+          platforms: [],
+          userId,
+          workspaceId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create post");
+      }
+
+      // Redirect to the post editor with the new post ID
+      router.push(`/ws/${workspaceId}/compose/${data.post.$id}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create post");
+      setIsCreating(false);
+    }
+  };
+
+  return (
+    <Button
+      onClick={handleCreatePost}
+      disabled={isCreating}
+      className="h-11 px-6 bg-white border-2 border-zinc-900 text-zinc-900 hover:bg-zinc-50 hover:text-zinc-900 rounded-lg font-bold tracking-wide transition-all shadow-[4px_4px_0px_0px_rgba(24,24,27,1)] hover:shadow-[2px_2px_0px_0px_rgba(24,24,27,1)] hover:translate-x-[2px] hover:translate-y-[2px] disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {isCreating ? (
+        <>
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          Creating...
+        </>
+      ) : (
+        <>
+          <PenTool className="w-4 h-4 mr-2" />
+          CREATE POST
+        </>
+      )}
+    </Button>
+  );
+}
+
 export default function WorkspaceDashboardPage() {
   const params = useParams();
   const router = useRouter();
@@ -174,12 +233,7 @@ export default function WorkspaceDashboardPage() {
             </div>
 
             <div className="flex items-center gap-4 w-full md:w-auto justify-end">
-              <Link href={`/ws/${workspaceId}/compose`}>
-                <Button className="h-11 px-6 bg-white border-2 border-zinc-900 text-zinc-900 hover:bg-zinc-50 hover:text-zinc-900 rounded-lg font-bold tracking-wide transition-all shadow-[4px_4px_0px_0px_rgba(24,24,27,1)] hover:shadow-[2px_2px_0px_0px_rgba(24,24,27,1)] hover:translate-x-[2px] hover:translate-y-[2px]">
-                  <PenTool className="w-4 h-4 mr-2" />
-                  CREATE POST
-                </Button>
-              </Link>
+              <CreatePostButton workspaceId={workspaceId} userId={user?.$id} />
               <UserNav />
             </div>
           </div>
@@ -451,15 +505,7 @@ export default function WorkspaceDashboardPage() {
                     Your dashboard is empty. Create your first high-impact
                     LinkedIn post now.
                   </p>
-                  <Link href={`/ws/${workspaceId}/compose`}>
-                    <Button
-                      size="lg"
-                      className="rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Start Creating
-                    </Button>
-                  </Link>
+                  <CreatePostButton workspaceId={workspaceId} userId={user?.$id} />
                 </div>
               ) : (
                 <DataTable columns={columns} data={posts || []} />

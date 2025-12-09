@@ -2,48 +2,60 @@
 
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PostGenerator } from "@/components/post-generator";
 import { useAuth } from "@/lib/auth-context";
 import { Loader2 } from "lucide-react";
 
-export default function ComposePage() {
+export default function ComposeIndexPage() {
   const params = useParams();
   const router = useRouter();
   const workspaceId = params.workspaceId as string;
   
-  const { loading, user, workspaces, workspacesLoading, setCurrentWorkspaceById } = useAuth();
+  const { loading, user, currentWorkspace } = useAuth();
 
-  // Set current workspace from URL param
   useEffect(() => {
-    if (workspaceId && workspaces.length > 0 && !workspacesLoading) {
-      const exists = workspaces.find(w => w.$id === workspaceId);
-      if (exists) {
-        setCurrentWorkspaceById(workspaceId);
-      } else {
-        // Workspace not found, redirect to first workspace or onboarding
-        if (workspaces.length > 0) {
-          router.replace(`/ws/${workspaces[0].$id}/compose`);
-        } else {
-          router.replace("/onboarding");
+    async function createNewPost() {
+      if (!user || !currentWorkspace || loading) return;
+
+      try {
+        // Create new post with default title only
+        const response = await fetch("/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.$id,
+            workspaceId: currentWorkspace.$id,
+            content: "",
+            topic: "Untitled Post",
+            tone: "professional",
+            status: "draft",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to create post");
         }
+
+        const data = await response.json();
+        const postId = data.post.$id;
+        
+        // Redirect to the new post
+        router.replace(`/ws/${workspaceId}/compose/${postId}`);
+      } catch (error) {
+        console.error("Error creating post:", error);
+        // Fallback to dashboard if post creation fails
+        router.replace(`/ws/${workspaceId}`);
       }
     }
-  }, [workspaceId, workspaces, workspacesLoading, setCurrentWorkspaceById, router]);
+    
+    createNewPost();
+  }, [user, currentWorkspace, loading, router, workspaceId]);
 
-  if (loading || workspacesLoading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-zinc-500 font-medium">Loading editor...</p>
-        </div>
+  return (
+    <div className="h-screen w-full flex items-center justify-center bg-white">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-zinc-500 font-medium">Creating new post...</p>
       </div>
-    );
-  }
-
-  if (!user) {
-    return null; // Will redirect via AuthContext
-  }
-
-  return <PostGenerator />;
+    </div>
+  );
 }

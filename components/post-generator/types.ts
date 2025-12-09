@@ -1,9 +1,13 @@
 import { SocialAccount, SocialPlatform } from "@/lib/appwrite";
-import { Models } from "appwrite";
+import { PlatformContent } from "@/lib/types/post";
+
+// Save status type
+export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
 
 // Common types used across post-generator components
 export interface PostGeneratorState {
   content: string;
+  platformContent: PlatformContent;
   isGenerating: boolean;
   isPosting: boolean;
   showPreview: boolean;
@@ -16,14 +20,23 @@ export interface PostGeneratorState {
   dialectOpen: boolean;
   postLength: "short" | "medium" | "long";
   isRewriting: boolean;
+  postId: string | null;
+  saveStatus: SaveStatus;
+  lastSavedAt: Date | null;
 }
 
 export interface HeaderProps {
-  user: Models.User<Models.Preferences> | null;
-  loading: boolean;
   isPosting: boolean;
   hasContent: boolean;
+  topic: string;
+  onTopicChange: (topic: string) => void;
+  onTopicBlur: () => void;
   onPublish: () => void;
+  onSaveDraft: () => void;
+  onSchedule: () => void;
+  saveStatus: SaveStatus;
+  lastSavedAt: Date | null;
+  onBack: () => void;
   // Platform selector props
   selectedPlatforms: SocialPlatform[];
   onPlatformToggle: (platform: SocialPlatform) => void;
@@ -63,6 +76,7 @@ export interface EditorAreaProps {
   setContent: (content: string) => void;
   textDirection: "rtl" | "ltr";
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  activePlatform?: SocialPlatform;
 }
 
 export interface PreviewPaneProps {
@@ -81,6 +95,13 @@ export interface AccountStatusBarProps {
 export interface PreviewToggleProps {
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
+}
+
+export interface ScheduleDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSchedule: (scheduledAt: string) => void;
+  isScheduling: boolean;
 }
 
 // Style options for AI generation
