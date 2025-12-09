@@ -58,6 +58,14 @@ async function setupDatabase() {
       { key: "isPublished", type: "boolean", required: false, default: false },
       { key: "publishedTo", type: "string", size: 50, required: false }, // Platform published to
       { key: "publishedAt", type: "string", size: 50, required: false }, // ISO date
+      // New fields for Phase 1
+      { key: "status", type: "string", size: 20, required: false, default: "draft" }, // draft|scheduled|publishing|published|failed
+      { key: "scheduledAt", type: "string", size: 50, required: false }, // ISO date for scheduling
+      { key: "publishedPlatforms", type: "string", size: 2000, required: false, default: "[]" }, // JSON array
+      { key: "errorLog", type: "string", size: 2000, required: false }, // Error details
+      { key: "mediaUrls", type: "string", size: 2000, required: false, default: "[]" }, // JSON array of media URLs
+      { key: "retryCount", type: "integer", required: false, default: 0 }, // Number of retry attempts
+      { key: "lastRetryAt", type: "string", size: 50, required: false }, // Last retry timestamp
     ];
 
     console.log("Checking attributes...");
@@ -82,6 +90,16 @@ async function setupDatabase() {
             COLLECTION_ID,
             attr.key,
             attr.required,
+            attr.default
+          );
+        } else if (attr.type === "integer") {
+          await databases.createIntegerAttribute(
+            DATABASE_ID,
+            COLLECTION_ID,
+            attr.key,
+            attr.required,
+            undefined, // min
+            undefined, // max
             attr.default
           );
         }
@@ -109,6 +127,11 @@ async function setupDatabase() {
         type: "fulltext",
         attributes: ["content", "topic"],
       },
+      // New indexes for Phase 1
+      { key: "status_idx", type: "key", attributes: ["status"] },
+      { key: "scheduledAt_idx", type: "key", attributes: ["scheduledAt"] },
+      { key: "workspace_status_idx", type: "key", attributes: ["workspaceId", "status"] }, // Composite
+      { key: "user_status_idx", type: "key", attributes: ["userId", "status"] }, // Composite
     ];
 
     // Wait for attributes to be available before creating indexes
